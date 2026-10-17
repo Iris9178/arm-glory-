@@ -278,6 +278,7 @@ body.dark .steps button.on .n{background:rgba(0,0,0,.18)}
   padding:8px 14px;font-size:12.5px;font-weight:550;transition:.18s;
 }
 .chip-btn:hover{background:var(--btn-face-hover)}
+.home-ic{font-size:15px;line-height:1;font-weight:700;margin-top:-1px}
 .chip-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--ink);transition:.2s}
 body.no-lg .chip-btn .dot{background:var(--ink-3)}
 .chip-btn .th{
@@ -972,6 +973,7 @@ h3{font-size:clamp(13.5px,1.35vw,15px)}
 
   .top-actions{gap:6px}
   .top-actions .lbl{display:none}
+  #btn-lang .lbl{display:inline;font-size:11px;letter-spacing:.02em}
   .chip-btn{padding:8px 11px}
   #btn-help{font-size:11.5px;padding:8px 10px}
 
@@ -1045,6 +1047,40 @@ h3{font-size:clamp(13.5px,1.35vw,15px)}
   .package{width:min(330px,78vw)}
 }
 
+/* ==================== 平板 / 小屏横屏 ====================
+   821–1080px 仍使用桌面三栏布局，但顶部中央的步骤 dock 会和右上角的
+   首页 / 语言 / 主题按钮抢位置。这里把步骤栏改成底部胶囊导航。 */
+@media (min-width:821px) and (max-width:1080px){
+  .steps{
+    left:10px;right:10px;top:auto;bottom:calc(10px + env(safe-area-inset-bottom));
+    transform:none;z-index:70;justify-content:space-between;gap:0;padding:5px;
+    box-shadow:inset 0 1px 0 var(--glass-hi),var(--shadow);
+  }
+  .steps button{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;padding:6px 2px;font-size:9px;line-height:1.1;letter-spacing:0;
+  }
+  .steps button .n{margin:0;width:18px;height:18px;font-size:9.5px}
+  .steps button .sl{display:block;white-space:nowrap;transform:scale(.94)}
+  .steps button:disabled{opacity:.26}
+
+  .stage{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(78px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px)}
+  .delhint{bottom:calc(78px + env(safe-area-inset-bottom))}
+  .delhint.on ~ .toast{bottom:calc(130px + env(safe-area-inset-bottom))}
+}
+
+/* 1081–1519px：保留顶部步骤 dock，但把右上角按钮收成图标，
+   给中间 dock 让出空间；语言按钮始终保留文字。
+   1520px 起步骤 dock 与完整按钮组才真正互不重叠。 */
+@media (min-width:1081px) and (max-width:1519px){
+  .top-actions{gap:6px}
+  .top-actions .lbl{display:none}
+  #btn-lang .lbl{display:inline;font-size:11px;letter-spacing:.02em}
+  .top-actions .chip-btn{padding:8px 10px}
+  #btn-help{font-size:11.5px;padding:8px 10px}
+}
+
 /* 窄屏手机 */
 @media (max-width:560px){
   .stage{padding-top:calc(var(--topbar-h,60px) + 10px)}
@@ -1062,6 +1098,10 @@ h3{font-size:clamp(13.5px,1.35vw,15px)}
 
 /* 超窄屏：只保留必需信息 */
 @media (max-width:430px){
+  .top-actions{gap:4px}
+  .top-actions .chip-btn{padding:7px 7px}
+  #btn-help{font-size:10.5px}
+  .brand{padding-right:4px}
   .brand-txt b{font-size:11.5px}
   .brand-mark{width:27px;height:27px}
   .steps button{padding:6px 0}
@@ -1237,6 +1277,1375 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 })();
 </script>
 
+<script>
+/* ============================================================
+   i18n.js —— 中 / 英双语层
+   中文是源语言；英文通过词典 + 模式规则覆盖所有界面与数据文案。
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var EN = {
+    /* ---------- 静态界面 / 顶栏 ---------- */
+    '正在初始化…': 'Initializing…',
+    '重振 ARM 荣光': 'Revive the Glory of ARM',
+    '切换浅色 / 暗灰主题': 'Switch light / dark theme',
+    '切换液态玻璃折射': 'Toggle liquid-glass refraction',
+    '折射 开': 'Refraction On',
+    '折射 关': 'Refraction Off',
+    '浅色': 'Light',
+    '暗灰': 'Dark',
+    '帮助': 'Help',
+    '怎么玩': 'How to play',
+    '首页': 'Home',
+    '回到首页': 'Back to home',
+    '切换语言 / Switch language': 'Switch language / 切换语言',
+    '拖出裸片即删除该模块': 'Drag off the die to delete this block',
+    '松开即删除': 'Release to delete',
+
+    /* ---------- 流程 ---------- */
+    '制程与面积': 'Process & Area',
+    '版图布局': 'Floorplan',
+    '流片封装': 'Tape-out & Package',
+    '超频实验室': 'Overclock Lab',
+    '跑分发布会': 'Benchmark Launch',
+
+    /* ---------- 首页 ---------- */
+    'ARM DYNASTY · 芯片自制模拟器': 'ARM DYNASTY · Custom Chip Simulator',
+    '你来当 Arm 的芯片架构师。': 'You are Arm’s chip architect. ',
+    '先选一颗裸片（die）的面积': 'Choose the area of a die first ',
+    '，然后把 CPU 核心': ', then place CPU cores ',
+    '一颗一颗': 'one by one ',
+    '摆到硅片上 —— 每颗核心都有自己的面积和频率（CPU 面积固定，GPU 版图可拉伸）。摆完流片封装，进超频实验室拉电压、解锁功耗墙，最后跑一次 Geekbench 6 与曼哈顿 3.1，看它是成为「机皇」，还是变成「火龙」。': 'onto the silicon — every core has its own area and frequency (CPU area is fixed; GPU blocks can be stretched). Then tape out and package it, head to the overclock lab to raise voltage and unlock the power limit, and finally run Geekbench 6 and Manhattan 3.1 to see whether it becomes a “phone king” or a “fire dragon”.',
+    '桌面端 / 服务器版型还支持 ': 'Desktop and server platforms also support ',
+    '2~4 块基础 die 拼接': '2–4 base-die assemblies',
+    '（类似 Apple M Pro / Max / Ultra），互连拓扑、连接方式与跨 die 效率都会直接写进跑分。': ' (like Apple M Pro / Max / Ultra). Interconnect topology, link type, and cross-die efficiency all feed directly into the score.',
+    '开始流片 →': 'Start Tape-out →',
+    '怎么玩？': 'How to Play?',
+    '款 CPU 核心（2020-2026）': 'CPU cores (2020–2026)',
+    '款移动 GPU 架构': 'mobile GPU architectures',
+    '款 5G 基带': '5G modems',
+    '数据来自知识库：ARM CPU 全谱系、高通 Oryon 代际规格、GB6 实测跑分、ARM / Adreno GPU 型号汇总、移动端基带型号参考。': 'Data anchors: the full ARM CPU line-up, Qualcomm Oryon generations, measured GB6 scores, ARM / Adreno GPU model summaries, and mobile modem references.',
+
+    /* ---------- ① setup ---------- */
+    '① 版型 · 面积 · 制程': '① Platform · Area · Process',
+    '先定产品定位 —— 它决定可选的裸片面积、散热池、功耗墙与温度墙；选完面积与制程，就进版图。': 'Pick the product segment first — it determines available die areas, cooling headroom, power limit, and thermal limit. Then choose area and process, and move on to the floorplan.',
+    '下一步：摆版图 →': 'Next: Floorplan →',
+    '版型 Platform': 'Platform',
+    '切换版型会': 'Switching platform will ',
+    '清空上一版的所有选择与版图': 'clear all previous selections and the floorplan',
+    '（含预置模块），从头开始。': ' (including preset modules), starting over.',
+    '裸片面积 Die Area': 'Die Area',
+    '可选档位 · 每块 die': 'available tiers · per die',
+    '制程节点 Process Node': 'Process Node',
+    '品牌与命名': 'Brand & Naming',
+    '芯片名': 'Chip name',
+    '品牌 / 平台': 'Brand / Platform',
+    '发布会 Slogan': 'Launch slogan',
+    'ARM 公版架构': 'Arm reference architecture',
+    'Arm CSS 定制': 'Arm CSS custom',
+    '自研微架构': 'In-house microarchitecture',
+    '堆料狂魔工作室': 'Stack-it-All Studio',
+    '性价比守门员': 'Value Gatekeeper',
+    '多 Die 拼接': 'Multi-Die Assembly',
+    '移动端不可用': 'Not available on mobile',
+    '手机 SoC 只支持单 die —— 面积、功耗墙和封装厚度都塞不下第二块大核 die。切到': 'Phone SoCs support only a single die — area, power limit, and package thickness cannot fit a second big die. Switch to ',
+    '版型才能拼接。': ' platform to enable multi-die.',
+    '多 Die 拼接 Multi-Die': 'Multi-Die Assembly',
+    '桌面 / 服务器': 'Desktop / Server',
+    '桌面端': 'Desktop',
+    '或': 'or',
+    '服务器': 'Server',
+    '流程': 'Steps',
+    '像 Apple M Pro / Max / Ultra 那样，把多块相同的基础 die 拼成一颗大芯片。每块 die 有': 'Assemble multiple identical base dies into one large chip, like Apple M Pro / Max / Ultra. Each die has its own ',
+    '独立版图': 'independent floorplan',
+    '；跨 die 通信由互连方案决定，会直接折损多核与 GPU 跑分。默认显示 Die 1，版图页顶部可切换。': '. Cross-die communication depends on the interconnect and directly discounts multi-core and GPU scores. Die 1 is shown by default; switch dies at the top of the floorplan page.',
+    '选 2 块以上，版图页顶部会出现 ': 'Choose 2 or more dies and a ',
+    'Die 选择栏': 'Die selector',
+    '和': ' and ',
+    '总览图': 'Overview',
+    '。': '.',
+    '互连拓扑': 'Interconnect topology',
+    '默认连接方式': 'Default link type',
+    '当前 ': 'Current ',
+    ' · 互连质量 ': ' · interconnect quality ',
+    '多核跨 die 效率': 'multi-core cross-die efficiency',
+    'GPU 跨 die 效率': 'GPU cross-die efficiency',
+    '本次链接：': 'Links: ',
+    '缺陷密度': 'Defect density',
+    '晶圆成本': 'Wafer cost',
+    '该面积良率': 'Yield at this area',
+    '已选': 'Selected',
+    '选择': 'Select',
+    '单片方案': 'Single die',
+    '×': '×',
+    ' 基础 die 拼接': ' base-die assembly',
+
+    /* ---------- ② layout ---------- */
+    '② 摆版图 · 总览图': '② Floorplan · Overview',
+    '点击任意一块 die 进入编辑。连线代表互连拓扑；在下方逐条改连接方式，跨 die 效率会实时变化。': 'Click any die to edit it. Lines show the interconnect topology; change each link below and cross-die efficiency updates live.',
+    '分享当前 die': 'Share current die',
+    '全部自动布局': 'Auto-place all',
+    '去流片 →': 'Tape out →',
+    '互连方案 Interconnect': 'Interconnect',
+    '互连方案': 'Interconnect',
+    '单 die 良率 / 封装良率': 'Per-die / package yield',
+    '跨 die 的多核 / GPU / AI / 光追都按 Q 折损；媒体与本地内存不吃互连折损。想拉高 Q：换更密的互连，或用环形 / 网格 / 全连接拓扑。': 'Cross-die multi-core / GPU / AI / ray-tracing are discounted by Q; media and local memory are not. To raise Q: use a denser link, or a ring / mesh / all-to-all topology.',
+    '拓扑': 'Topology',
+    '单 die 无需互连。': 'A single die needs no interconnect.',
+    '拓扑决定哪些 die 互相连接；逐条覆盖连接方式后，按': 'Topology determines which dies connect. After overriding individual links, Q is computed from ', '平均质量 + 最弱链路': 'average quality + weakest link',
+    '综合计算 Q。Q 越高，跨 die 的多核 / GPU 折损越小。': '. Higher Q means less cross-die loss for multi-core and GPU.',
+    '拼接总览 Package': 'Package Summary',
+    '基础 die': 'Base dies',
+    '版图占用': 'Floorplan usage',
+    '单 die 良率': 'Per-die yield',
+    '封装良率（逐块相乘）': 'Package yield (multiplied)',
+    '互连质量 Q': 'Interconnect quality Q',
+    '多核 / GPU 跨 die 效率': 'Multi-core / GPU cross-die efficiency',
+    '互连总带宽 / 平均延迟': 'Total interconnect bandwidth / avg latency',
+    '互连功耗 / 成本': 'Interconnect power / cost',
+    '预估综合分': 'Estimated total score',
+    '预估峰值功耗': 'Estimated peak power',
+    '② 摆版图 Floorplan': '② Floorplan',
+    'CPU / GPU 都是': 'CPU and GPU blocks are ',
+    '一颗核心一块版图': 'one block per core',
+    '。拖拽移动；': '. Drag to move; ',
+    'GPU 可拖右下角缩放': 'drag the lower-right corner to resize a GPU',
+    '，': ', ',
+    'CPU 面积固定、只能按 R 横竖对调': 'CPU area is fixed — press R to swap width and height',
+    '；放不下的空位会自动变形适配。': '; blocks auto-fit when the remaining space cannot hold their default shape. ',
+    'Shift + 点击': 'Shift + click',
+    '多个相连的 GPU 块可以合并成一块大区域；': 'multiple connected GPU blocks to merge them into one large region; ',
+    '空白处拖动框选': 'drag on empty space to marquee-select',
+    '（手机：': ' (on touch: ',
+    '长按空白处': 'long-press empty space',
+    '再拖）后可批量': ' and drag) to batch ',
+    '合并 GPU / 复制 / 删除': 'merge GPUs / copy / delete',
+    '把 CPU 核心摆在 SLC 旁边': 'place CPU cores next to SLC',
+    '能拿到缓存局部性加成（最高 +12%）。': ' for a cache-locality bonus (up to +12%).',
+    '。多 die：顶部切换 die，或点「总览图」查看完整拼接和互连。': '. Multi-die: switch dies at the top, or open Overview to see the full assembly and interconnect.',
+    '分享版图': 'Share floorplan',
+    '分享总览': 'Share Overview',
+    '分享全部 die 的拼接总览': 'Share the full multi-die package overview',
+    '自动布局': 'Auto-place',
+    '添加元件': 'Add Components',
+    '＋ 添加 CPU 核心': '+ Add CPU core',
+    '选型号 → 拖入裸片': 'Pick a model → drag onto the die',
+    '＋ 添加 GPU 核心': '+ Add GPU core',
+    '选架构 → 拖入裸片': 'Pick an architecture → drag onto the die',
+    '待放置': 'Unplaced',
+    '全部已放置 · 拖拽移动；GPU 可拖右下角缩放': 'All placed · drag to move; drag a GPU’s lower-right corner to resize',
+    '全部已放置 · 拖拽方块可移动，拖右下角可缩放': 'All placed · drag blocks to move; drag the lower-right corner to resize',
+    '超大核': 'Prime',
+    '大核': 'Big',
+    '中核': 'Mid',
+    '小核': 'Little',
+    '面积占用': 'Area used',
+    'GB6 单核': 'GB6 Single',
+    'GB6 多核': 'GB6 Multi',
+    '多核效率': 'Multi-core efficiency',
+    '曼哈顿 3.1': 'Manhattan 3.1',
+    '峰值功耗': 'Peak power',
+    '良率': 'Yield',
+    '网格': 'grid',
+    '每格': 'per cell',
+    '空白处拖动可框选': 'drag empty space to marquee-select',
+    '选区': 'Selection',
+    '个模块': 'modules',
+    '区域': 'Region',
+    '格': 'cells',
+    '占用': 'used',
+    '含': 'with',
+    '块 GPU': 'GPUs',
+    '可合并：': 'Mergeable: ',
+    '，占': ', occupies ',
+    '，补矩形多付': ', extra cells to fill the rectangle: ',
+    '，零浪费': ', zero waste',
+    '合并 GPU': 'Merge GPUs',
+    '拆分': 'Split',
+    '复制': 'Copy',
+    '删除': 'Delete',
+    '清除选择': 'Clear selection',
+    '清除选区': 'Clear selection',
+    '移除该型号全部核心': 'Remove all cores of this model',
+    '移除该架构全部核心': 'Remove all cores of this architecture',
+    '横竖对调（R）': 'Swap width/height (R)',
+    '横竖对调（R），面积不变': 'Swap width/height (R), area unchanged',
+    '合并要求：同架构、同频率、彼此': 'Merge requires the same architecture, same frequency, and ',
+    '边对边相连': 'edge-to-edge adjacency',
+    '；补成矩形多出来的空格要自己吃面积。复制保持原排版，就近整体贴到旁边。': '; extra cells needed to complete the rectangle are charged as area. Copy preserves the layout and pastes the whole selection nearby.',
+    '触屏：': 'Touch: ',
+    '长按裸片空白处': 'long-press empty die space',
+    '即可重新拉框；拖选区内任意模块可整块搬走。': ' to start a new marquee; drag any selected block to move the whole selection.',
+    '制程节点': 'Process node',
+    'CPU 核心': 'CPU Cores',
+    '共': 'Total',
+    '颗': '',
+    '还没有 CPU，点左侧「＋ 添加 CPU 核心」': 'No CPUs yet — click “+ Add CPU core” on the left',
+    'GPU 核心': 'GPU Cores',
+    '还没有 GPU 核心': 'No GPU cores yet',
+    '内存控制器': 'Memory Controllers',
+    '未知内存': 'Unknown memory',
+    '未知 NPU': 'Unknown NPU',
+    '未知 ISP': 'Unknown ISP',
+    '未知解码器': 'Unknown decoder',
+    '未知音频 DSP': 'Unknown audio DSP',
+    '内存': 'Memory',
+    '没有内存控制器 —— 带宽归零。': 'No memory controller — bandwidth is zero.',
+    '＋ 添加内存块': '+ Add memory block',
+    '没有 NPU，端侧 AI 全靠 CPU 硬算。': 'No NPU — on-device AI falls back to the CPU.',
+    '＋ 添加 NPU': '+ Add NPU',
+    'SLC 系统缓存': 'SLC System Cache',
+    '没有 SLC —— CPU 访问内存又慢又远。': 'No SLC — CPU memory access is slow and distant.',
+    '＋ 添加 SLC': '+ Add SLC',
+    '影像 ISP': 'Camera ISP',
+    '没有 ISP —— 摄像头只能软处理。': 'No ISP — the camera must be processed in software.',
+    '＋ 添加 ISP': '+ Add ISP',
+    '视频编解码': 'Video Codec',
+    '没有解码器，4K 视频得 CPU 软解。': 'No decoder — 4K video must be software-decoded by the CPU.',
+    '＋ 添加视频解码器': '+ Add video decoder',
+    '音频 DSP': 'Audio DSP',
+    '没有音频 DSP，语音唤醒压 CPU。': 'No audio DSP — voice wake runs on the CPU.',
+    '＋ 添加音频 DSP': '+ Add audio DSP',
+    '高速连接': 'High-speed I/O',
+    '没有高速连接 —— 核间与 GPU 通路靠 NoC 硬扑。': 'No high-speed I/O — core and GPU traffic relies on bare NoC.',
+    '＋ 添加高速连接': '+ Add high-speed I/O',
+    '加进来后，选中它用 W / H 自由拉长宽，带宽按格数算。': 'After adding, select it and use W / H to stretch it freely; bandwidth scales with cell count.',
+    '基带与互连': 'Modem & Interconnect',
+    '基带（本版型可选）': 'Modem (available for this platform)',
+    '铺设 NoC 互连总线': 'Lay out the NoC interconnect bus',
+    '选中模块': 'Selected Block',
+    '已放置': 'Placed',
+    '选中模块查看详情': 'Select a block to inspect it',
+    '点击裸片上的方块查看详情：GPU 可拉伸，CPU 面积固定、按 R 横竖对调。': 'Click a block on the die for details: GPUs can be stretched; CPU area is fixed — press R to swap width and height.',
+    '缓存容量': 'Cache capacity',
+    '叠多块 SLC，缓存总量相加；把 CPU 摆在它旁边还能拿局部性加成。': 'Stack multiple SLC blocks to add capacity; placing CPUs next to them grants a locality bonus.',
+    '内存代数': 'Memory generation',
+    '一块 = 一路内存控制器，叠多块带宽相加（现实中就是双通道 / 四通道）。': 'One block = one memory controller channel; stacking adds bandwidth (dual/quad-channel in reality).',
+    'NPU 型号': 'NPU model',
+    '叠多块 NPU，算力相加（面积与功耗也跟着上）。': 'Stack multiple NPUs to add TOPS (area and power scale too).',
+    '当前频率': 'Current frequency',
+    '当前': 'Current',
+    '频率': 'Frequency',
+    'ISP 型号': 'ISP model',
+    'ISP 负责拍照与录像的原始信号处理，叠多块算力相加。': 'The ISP handles raw camera signal processing; stacking adds throughput.',
+    '解码器型号': 'Decoder model',
+    '专职解码，不占 CPU；叠多块可以同时解多路视频。': 'Dedicated decoding without using the CPU; stacking decodes multiple streams at once.',
+    '音频 DSP 型号': 'Audio DSP model',
+    '常驻小算力，功耗极低 —— 语音唤醒与音频解码靠它省电。': 'A tiny always-on engine with very low power — voice wake and audio decoding save battery here.',
+    '带宽': 'Bandwidth',
+    '用下面的 W / H 自由拉长拉宽，形状随意。': 'Use W / H below to stretch it freely — any shape works.',
+    '基带在右侧「固定模块」里换型号。': 'Change the modem model in the “Modem & Interconnect” section on the right.',
+    '区块尺寸（格）': 'Block size (cells)',
+    '横竖 ↻': 'Swap ↻',
+    '面积固定': 'Fixed area',
+    'CPU 核心占': 'This CPU core occupies ',
+    '面积由物理尺寸固定，不能拉伸；只能横竖对调。': 'Its area is fixed by physics and cannot be stretched; only width/height can be swapped.',
+    '物理最小': 'Physical minimum',
+    '余量': 'Spare',
+    '缓存加成': 'cache bonus',
+    '拆分成': 'Split into',
+    '个独立核心': 'independent cores',
+    '已选': 'Selected',
+    '块区域': 'regions',
+    '合并成一块 GPU': 'Merge into one GPU',
+    'Shift + 点击 GPU 块可多选。只要彼此相连（边对边贴上）就能合并；共享 L2 每多一颗 +1.5%，最多 +6%。合并后块右上角的 ': 'Shift + click GPU blocks to multi-select. Any edge-adjacent blocks can merge; shared L2 grants +1.5% per extra core, up to +6%. The ',
+    ' 就是它包含的原始核心数。': ' badge in the merged block’s top-right shows its original core count.',
+    '峰值': 'Peak',
+    '持续': 'Sustained',
+    '颗': '',
+
+    /* ---------- ③ pack ---------- */
+    '③ 流片 · 封装 · 展示': '③ Tape-out · Package · Showcase',
+    '把版图切成裸片、盖上封装基板、打出焊球 —— 这就是你手里这颗 SoC 了。': 'Cut the floorplan into a die, cover it with a package substrate, and attach the solder balls — that is your SoC.',
+    '← 回去改版图': '← Back to floorplan',
+    '进超频实验室 →': 'Enter Overclock Lab →',
+    '封装良率': 'Package yield',
+    '单颗成本': 'Unit cost',
+    '规格书 Spec Sheet': 'Spec Sheet',
+    '单片': 'Single die',
+    '单 die': 'Single die',
+    '纯计算芯片': 'Pure compute chip',
+    '卫星': 'satellite',
+    '靠 NoC 硬扑': 'Bare NoC only',
+    '逐块相乘': 'multiplied per die',
+    '预估 Geekbench 6': 'Estimated Geekbench 6',
+    '预估曼哈顿 3.1': 'Estimated Manhattan 3.1',
+    '理论峰值功耗': 'Theoretical peak power',
+    '复制规格文案': 'Copy spec sheet',
+    'Die / 互连': 'Die / Interconnect',
+    '系统缓存': 'System cache',
+    '制程': 'Process',
+    '版图利用率': 'Floorplan utilization',
+    '个块 SLC': 'SLC blocks',
+
+    /* ---------- ④ overclock ---------- */
+    '④ 超频实验室 Overclock Lab': '④ Overclock Lab',
+    '拉频率、加压、解锁功耗墙。温度会爬到稳态，芯片开始降频 —— 跑分的「峰值」和「持续」是两回事。': 'Raise clocks, add voltage, unlock the power limit. Temperature climbs to steady state and the chip starts throttling — “peak” and “sustained” scores are two different things.',
+    '开始跑分': 'Run Benchmark',
+    '频率与电压': 'Frequency & Voltage',
+    '体质': 'Silicon quality',
+    '性能核频率倍率': 'Performance-core clock multiplier',
+    '0.85×（省电）': '0.85× (power saving)',
+    '设计值': 'Design',
+    '安全上限': 'Safe limit',
+    'GPU 频率倍率': 'GPU clock multiplier',
+    '所有 GPU 核心同步倍频': 'All GPU cores scale together',
+    '电压偏移 VDD': 'Voltage offset VDD',
+    '−100mV 欠压（省电但更容易跑飞）': '−100mV undervolt (saves power, easier to crash)',
+    '+150mV 加压（更稳但更烫）': '+150mV overvolt (more stable, much hotter)',
+    '功耗墙 PL1': 'Power limit PL1',
+    '保守': 'conservative',
+    '散热背夹警告': 'cooling clip warning',
+    '电源与散热双烤': 'power and cooling double bake',
+    '机架供电柜警告': 'rack PDU warning',
+    '散热背夹警告': 'cooling clip warning',
+    '电源与散热双烤': 'power and cooling double bake',
+    '机架供电柜警告': 'rack PDU warning',
+    '散热方案': 'Cooling Solution',
+    '多 die 热阻 +': 'multi-die thermal resistance +',
+    '实时预测': 'Live Prediction',
+    '预估峰值温度': 'Estimated peak temperature',
+    '26°C 室温': '26°C ambient',
+    '温度墙': 'thermal limit',
+    '稳态降频后': 'After steady-state throttling',
+    '预估持续温度': 'Estimated sustained temperature',
+    '稳定性风险评估': 'Stability Risk',
+    '翻车概率': 'Crash probability',
+    '建议降频或加压': 'lower clocks or raise voltage',
+    '稳如老狗': 'Rock solid',
+    '略有风险': 'Slight risk',
+    '心跳加速': 'Heart racing',
+    '大概率翻车': 'Likely to crash',
+    '同一颗硅、同一套参数，翻车判定固定（防 SL）': 'Same silicon + same settings = deterministic crash check (no save-scumming)',
+    'CPU ': 'CPU ',
+    ' vs 安全线 ': ' vs safe limit ',
+    '当前 vGain ×': 'Current vGain ×',
+    '预计 Geekbench 6': 'Projected Geekbench 6',
+    '预计曼哈顿 3.1': 'Projected Manhattan 3.1',
+    '预计综合分': 'Projected total score',
+    '预览按“不翻车”计算；实际跑分是否翻车取决于下面的稳定性风险。': 'Preview assumes no crash; the actual run is decided by the stability risk below.',
+    '性能核': 'performance cores',
+
+    /* ---------- ⑤ bench ---------- */
+    '跑分中… 请不要碰手机': 'Benchmarking… hands off the phone',
+    '温度正在爬升，风扇（如果有的话）正在起飞。': 'Temperature is climbing; the fan (if any) is taking off.',
+    'GEARING UP': 'GEARING UP',
+    'FINISHED': 'FINISHED',
+    '温度 °C': 'Temp °C',
+    '功耗 W': 'Power W',
+    '频率保持率': 'Clock retention',
+    '测试项目': 'Tests',
+    'Geekbench 6 · 单核': 'Geekbench 6 · Single-Core',
+    'Geekbench 6 · 多核': 'Geekbench 6 · Multi-Core',
+    'GFXBench · 曼哈顿 3.1': 'GFXBench · Manhattan 3.1',
+    '内存带宽': 'Memory Bandwidth',
+    'AI 算力': 'AI Compute',
+    '鲸兔兔 v10 · 综合': 'WhaleBench v10 · Total',
+    '分': 'pts',
+    'fps': 'fps',
+    'GB/s': 'GB/s',
+    '温度墙': 'Thermal limit',
+
+    /* ---------- result ---------- */
+    '翻车了': 'It Crashed',
+    '频率拉得太狠，这颗硅在测试跑到一半的时候直接挂掉了 —— 黑屏、重启、掉帧三连。': 'You pushed the clocks too hard. The silicon died halfway through the run — black screen, reboot, and frame drops.',
+    '事故报告': 'Incident Report',
+    'CPU 频率': 'CPU clock',
+    'GPU 频率': 'GPU clock',
+    '回去调参数': '← Back to tuning',
+    '重新抽一颗硅': 'Reroll silicon',
+    '成绩单': 'Scorecard',
+    '峰值功耗': 'Peak power',
+    '持续功耗': 'Sustained power',
+    '持续温度': 'Sustained temperature',
+    '频率保持率': 'Clock retention',
+    '性价比': 'Value',
+    'Die 数': 'Die count',
+    '互连质量': 'Interconnect quality',
+    '与历代旗舰对比': 'vs. flagship history',
+    '本版型的参考机型均无集成 GPU，略过图形对比。': 'Reference chips for this platform have no integrated GPU, so graphics comparison is skipped.',
+    '架构师点评': 'Architect’s Review',
+    '这颗芯片没毛病，规格均衡、散热到位 —— 教科书级别的设计。': 'No flaws: balanced specs and adequate cooling — a textbook design.',
+    '散热方案': 'Cooling',
+    '每片晶圆出片': 'Dies per wafer',
+    '每片晶圆出片（单 die）': 'Dies per wafer (per die)',
+    '重新超频': '← Re-overclock',
+    '改版图': 'Edit floorplan',
+    '分享成绩': 'Share score',
+    '复制发布会文案': 'Copy launch copy',
+    '设计下一颗 →': 'Design Next Chip →',
+    '媒体引擎': 'Media engine',
+    'ISP + 编解码 + 音频': 'ISP + codec + audio',
+    '通信': 'Connectivity',
+    'Gbps 下行': 'Gbps downlink',
+    '鲸兔兔 v10 综合': 'WhaleBench v10 Total',
+    '持续功耗': 'Sustained power',
+    '峰值温度': 'Peak temperature',
+    '频率保持': 'Clock retention',
+    '单颗成本': 'Unit cost',
+    '综合分': 'Total score',
+
+    /* ---------- picker ---------- */
+    '选择 CPU 核心型号': 'Choose a CPU Core',
+    '点击型号加入「待放置」，然后拖到裸片上。数量不设上限，放不下是你自己的事。把大核摆在 SLC 旁边能拿到缓存局部性加成。': 'Click a model to add it to Unplaced, then drag it onto the die. No quantity limit — fitting it is your problem. Placing big cores next to SLC grants a cache-locality bonus.',
+    '选择 GPU 架构': 'Choose a GPU Architecture',
+    '点击架构加入「待放置」。只要彼此相连，就能 Shift 多选后合并成一块大 GPU 区域。': 'Click an architecture to add it to Unplaced. Any connected blocks can be Shift-selected and merged into one large GPU region.',
+    '添加内存控制器': 'Add Memory Controller',
+    '可以叠多块 —— 带宽相加，但总线会给边际递减，堆太多不划算。': 'You can stack multiple blocks — bandwidth adds up, but bus scaling has diminishing returns.',
+    '添加 NPU': 'Add NPU',
+    '可以叠多块 —— 算力直接相加，面积和功耗也跟着上。': 'Stack multiple blocks — TOPS add directly, and so do area and power.',
+    '添加 ISP': 'Add ISP',
+    '图像信号处理器：拍照与录像的核心。可叠多块，算力相加。': 'Image signal processor: the heart of photo and video capture. Stack blocks to add throughput.',
+    '添加视频解码器': 'Add Video Decoder',
+    '专职视频解码，不占 CPU。想流畅看 8K / AV1 就靠它。': 'Dedicated video decoding without using the CPU. Essential for smooth 8K / AV1 playback.',
+    '添加音频 DSP': 'Add Audio DSP',
+    '音频与语音的常驻小算力，功耗极低，能省下不少待机耗电。': 'A tiny always-on engine for audio and voice with very low power — big standby savings.',
+    '添加高速连接': 'Add High-speed I/O',
+    '长宽完全自由：加进来后，在「选中模块」面板用 W / H 拉到你要的形状。带宽、成本、功耗都按占格数算。': 'Fully flexible shape: after adding, use W / H in the Selected Block panel. Bandwidth, cost, and power all scale with cells.',
+    '添加 SLC 系统缓存': 'Add SLC System Cache',
+    '可以叠多块 —— 缓存总量相加。把 CPU 核心摆在 SLC 旁边，频率没变但延迟变低，跑分会涨。': 'Stack blocks to add cache. Place CPU cores next to SLC: same clock, lower latency, higher scores.',
+    '本次添加数量': 'Quantity',
+    '个（1 个 → 手动拖入；多个 → 自动铺好）': ' (1 → drag manually; multiple → auto-placed)',
+    '整颗': 'whole GPU',
+    '单核': 'per core',
+    '上限': 'max',
+    '光追': 'ray tracing',
+
+    /* ---------- share ---------- */
+    '分享图片': 'Share Image',
+    '下载图片': 'Download image',
+    '关闭': 'Close',
+    '手机浏览器如果没触发下载，可以长按图片保存到相册。': 'If the mobile browser does not start a download, long-press the image to save it.',
+    '当前 die 的完整版图 + 模块清单，已放大到模块名称可读。': 'The full floorplan of the current die plus a block list, enlarged until labels are readable.',
+    '封装芯片 + 关键跑分，适合发群 / 发朋友圈。': 'Packaged chip + key benchmark scores — ready for group chats and social feeds.',
+    '模块清单': 'Block List',
+    '共': 'Total',
+    '个已放置单元': 'placed units',
+    '重振 ARM 荣光 · v15.3 ·': 'Revive the Glory of ARM · v15.3 ·',
+    'NoC 互连总线': 'NoC Interconnect Bus',
+
+    /* ---------- engine / diagnostics ---------- */
+    '超出裸片边界': 'outside the die boundary',
+    '与其他模块重叠': 'overlaps another block',
+    '面积小于物理下限': 'area below the physical minimum',
+    '还没有 CPU 核心': 'no CPU cores yet',
+    '所有 die 都还没有 CPU 核心': 'no CPU cores on any die',
+    '至少选 2 块 GPU': 'Select at least 2 GPU blocks',
+    '目前只支持合并 GPU 区域': 'Only GPU regions can be merged right now',
+    '只能合并同一架构的 GPU': 'Only GPUs of the same architecture can merge',
+    '有核心还没放置': 'Some cores are still unplaced',
+    '频率必须一致': 'Frequencies must match',
+    '选中的块彼此不相连 —— 至少要边对边贴上': 'Selected blocks are not connected — they must touch edge-to-edge',
+    '合并出的矩形会压到其他模块，先把它们挪开': 'The merged rectangle would overlap other blocks — move them first',
+    '无内存控制器': 'No memory controller',
+    '无': 'None',
+    '冰龙': 'Ice Dragon',
+    '温润': 'Warm',
+    '小火龙': 'Little Fire Dragon',
+    '火龙': 'Fire Dragon',
+    '烧烤架': 'Grill',
+    '摸起来是凉的，可以贴脸': 'Cool to the touch — you can rest your cheek on it',
+    '温热，还能握得住': 'Warm, still holdable',
+    '烫手，建议戴壳': 'Hot — use a case',
+    '能煎蛋了，注意手感': 'You could fry an egg — mind your fingers',
+    '这已经不是手机了，是暖手宝': 'This is no longer a phone; it is a hand warmer',
+
+    /* ---------- data: nodes ---------- */
+    '骁龙888/麒麟9000时代，便宜大碗': 'Snapdragon 888 / Kirin 9000 era — cheap and plentiful',
+    'A78/X1 的推荐节点': 'Recommended node for A78/X1',
+    'X2/A710 时代主力': 'Mainstream for the X2/A710 era',
+    'X4/A720、C1 核心基准': 'Baseline for X4/A720 and C1 cores',
+    '天玑9500 / C1-Ultra 同款': 'Same node as Dimensity 9500 / C1-Ultra',
+    'C2 系列推荐，贵且难产': 'Recommended for C2 series — expensive and hard to yield',
+    'C2-Pro 性能档': 'C2-Pro Performance',
+    'C2-Pro 能效档': 'C2-Pro Efficiency',
+
+    /* ---------- data: CPU notes ---------- */
+    '代号 Hercules': 'Codename Hercules',
+    'CXC 定制项目首款': 'First CXC custom project',
+    '代号 Matterhorn': 'Codename Matterhorn',
+    '纯64位': '64-bit only',
+    '代号 Hunter，ALU 增至 8': 'Codename Hunter — 8 ALUs',
+    '代号 Chaberton': 'Codename Chaberton',
+    '代号 Blackhawk，10-wide 解码': 'Codename Blackhawk — 10-wide decode',
+    '旗舰里常以 6 核集群出现': 'Often appears as a 6-core cluster in flagships',
+    '面积比 Ultra 小 35%': '35% smaller than Ultra',
+    '取代 X925，GB6 单核破 4000': 'Replaces X925 — GB6 single-core above 4000',
+    '4.35GHz 性能档': '4.35GHz performance SKU',
+    '3.1GHz 能效档，单核峰值仅 0.22W': '3.1GHz efficiency SKU — only 0.22W peak single-core',
+    'SME2 算力翻倍，LPDDR6/UFS5.0': 'Doubled SME2 throughput, LPDDR6/UFS5.0',
+    '骁龙 X Elite 首发 · 12 核 3.8/4.3GHz · GB6 实测单核 2880': 'Debuted in Snapdragon X Elite · 12 cores 3.8/4.3GHz · measured GB6 single-core 2880',
+    '骁龙 8 至尊版 · 2+6 全大核 · 该代缺独立 GB6 数据': 'Snapdragon 8 Elite · 2+6 all-big-core · no standalone GB6 data for this generation',
+    '与 Prime 共享 24MB 缓存 · 独立时钟域': 'Shares 24MB cache with Prime · independent clock domain',
+    '第五代骁龙 8 至尊版 · 实测单核 3524-3839（视散热）': 'Snapdragon 8 Elite Gen 5 · measured single-core 3524–3839 (cooling-dependent)',
+    '3.62GHz · 共享 24MB 缓存': '3.62GHz · shared 24MB cache',
+    '骁龙 8 Elite Gen 6 · 5.0GHz · 实测单核 4309-4332': 'Snapdragon 8 Elite Gen 6 · 5.0GHz · measured single-core 4309–4332',
+    'FlexCache：L2 变成全核共享池，减少数据迁移': 'FlexCache: L2 becomes a shared pool, reducing data migration',
+
+    /* ---------- data: tiers ---------- */
+    '单核峰值担当，面积与功耗刺客': 'Single-core peak leader — an area and power assassin',
+    '次旗舰，面积效率高': 'Sub-flagship with high area efficiency',
+    '持续性能主力': 'Backbone of sustained performance',
+    '能效核，跑分贡献小但省电': 'Efficiency core — small benchmark impact, big power savings',
+
+    /* ---------- data: GPU ---------- */
+    'Valhall 2代': 'Valhall Gen 2',
+    'Valhall 3代': 'Valhall Gen 3',
+    'Valhall 4代': 'Valhall Gen 4',
+    '第5代': '5th Gen',
+    '第5代 (Lumex)': '5th Gen (Lumex)',
+    'AI 原生': 'AI-native',
+    'Adreno 6 系 · 三星 5nm': 'Adreno 6 · Samsung 5nm',
+    'Adreno 7 系 · 三星 4nm': 'Adreno 7 · Samsung 4nm',
+    'Adreno 7 系 · 台积电 4nm': 'Adreno 7 · TSMC 4nm',
+    'Adreno 8 系 · 切片架构': 'Adreno 8 · sliced architecture',
+    'Adreno 8 系 · N3P + HBM': 'Adreno 8 · N3P + HBM',
+    '麒麟9000：曼哈顿3.1 约 123fps': 'Kirin 9000: Manhattan 3.1 ~123fps',
+    '天玑900/920': 'Dimensity 900/920',
+    '引入 CSF 命令流前端': 'Introduces CSF command-stream frontend',
+    '天玑8100 / RK3588': 'Dimensity 8100 / RK3588',
+    'ML 性能翻倍': 'Doubled ML performance',
+    '首款硬件级光追': 'First hardware ray tracing',
+    'DVS 延迟顶点着色': 'DVS deferred vertex shading',
+    '天玑9300 MP12': 'Dimensity 9300 MP12',
+    '较 G720 性能 +37%': '+37% performance vs G720',
+    '穿戴/入门': 'Wearables / entry',
+    'RTUv2，光追性能翻倍': 'RTUv2 — doubled ray-tracing performance',
+    '可选光追单元': 'Optional ray-tracing unit',
+    '集成 NPU，光追负载 -70%': 'Integrated NPU — 70% lower ray-tracing load',
+    '骁龙 888 · 曼哈顿 3.0 169fps · 阿兹特克 Vulkan 86fps': 'Snapdragon 888 · Manhattan 3.0 169fps · Aztec Vulkan 86fps',
+    '骁龙 8 Gen 1 · 阿兹特克 High 29-46fps（设备差异大）': 'Snapdragon 8 Gen 1 · Aztec High 29–46fps (large device variance)',
+    '骁龙 8 Gen 2 · 阿兹特克 High 61-63fps · 能效明显改善': 'Snapdragon 8 Gen 2 · Aztec High 61–63fps · much better efficiency',
+    '骁龙 8 Gen 3 · 阿兹特克 High 84fps · 安卓阵营第一': 'Snapdragon 8 Gen 3 · Aztec High 84fps · best on Android',
+    '骁龙 8 至尊版 · 阿兹特克 High 106-115fps · 较 750 +40%': 'Snapdragon 8 Elite · Aztec High 106–115fps · +40% vs 750',
+    '第五代骁龙 8 至尊版 · 1440p High 156fps · 3DMark 3180': 'Snapdragon 8 Elite Gen 5 · 1440p High 156fps · 3DMark 3180',
+
+    /* ---------- data: modems ---------- */
+    '无 5G（外挂 4G）': 'No 5G (external 4G)',
+    '没有 5G，发布会会被骂': 'No 5G — the launch event will get roasted',
+    '高通 骁龙 X60': 'Qualcomm Snapdragon X60',
+    'Sub-6 + 毫米波，骁龙888 同款': 'Sub-6 + mmWave, same as Snapdragon 888',
+    '联发科 M80': 'MediaTek M80',
+    '台积电 4nm，Sub-6 3CC 载波聚合': 'TSMC 4nm, Sub-6 3CC carrier aggregation',
+    '高通 骁龙 X65': 'Qualcomm Snapdragon X65',
+    '骁龙 8 Gen 1 同款': 'Same as Snapdragon 8 Gen 1',
+    '联发科 5G R16 内置': 'MediaTek 5G R16 integrated',
+    '天玑9200，Wi-Fi 7 双连接': 'Dimensity 9200, Wi-Fi 7 dual connection',
+    '高通 骁龙 X70': 'Qualcomm Snapdragon X70',
+    'Sub-6 4×4 MIMO': 'Sub-6 4×4 MIMO',
+    '联发科 R16 调制解调器': 'MediaTek R16 modem',
+    '天玑9300，UltraSave 3.0+ 省电': 'Dimensity 9300, UltraSave 3.0+ power saving',
+    '高通 骁龙 X75': 'Qualcomm Snapdragon X75',
+    '骁龙 8 Gen 3 同款': 'Same as Snapdragon 8 Gen 3',
+    '三星 Exynos 5300': 'Samsung Exynos 5300',
+    '双向卫星通讯 + Rel-18': 'Two-way satellite communication + Rel-18',
+    '联发科 Rel.17 调制解调器': 'MediaTek Rel.17 modem',
+    '天玑9400，AI 优化，GTI 创新奖': 'Dimensity 9400, AI-optimized, GTI Innovation Award',
+    '三星 Exynos 5400': 'Samsung Exynos 5400',
+    'NB-IoT NTN 低轨卫星直连': 'NB-IoT NTN direct-to-LEO satellite',
+    '高通 骁龙 X85': 'Qualcomm Snapdragon X85',
+    '第八代 5G，400MHz 带宽 + Turbo DSDA': '8th-gen 5G, 400MHz bandwidth + Turbo DSDA',
+    '高通 骁龙 X105': 'Qualcomm Snapdragon X105',
+    '第五代 5G AI 处理器，NR-NTN 卫星': '5th-gen 5G AI processor, NR-NTN satellite',
+    '不搭载基带': 'No modem',
+    '纯计算芯片，不需要 5G（桌面/服务器常规操作）': 'Pure compute chip — no 5G needed (normal for desktop/server)',
+
+    /* ---------- data: NPU / ISP / codec / audio / IO ---------- */
+    '轻量 NPU': 'Light NPU',
+    '够跑个相册搜索': 'Enough for gallery search',
+    '标准 NPU': 'Standard NPU',
+    '端侧大模型能聊两句': 'Can run a small on-device LLM',
+    '旗舰 NPU': 'Flagship NPU',
+    '端侧智能体（Agentic AI）': 'On-device agentic AI',
+    '轻量 ISP': 'Light ISP',
+    '单摄够用，4K30 视频': 'Fine for a single camera, 4K30 video',
+    '标准 ISP': 'Standard ISP',
+    '双摄同步、4K60 HDR': 'Dual-camera sync, 4K60 HDR',
+    '旗舰 ISP': 'Flagship ISP',
+    '三摄并行、8K RAW 录制': 'Triple-camera parallel, 8K RAW recording',
+    '入门解码': 'Entry decoder',
+    '主流解码': 'Mainstream decoder',
+    '旗舰编解码': 'Flagship codec',
+    'AV1 / VVC 双路 8K60': 'Dual-channel AV1 / VVC 8K60',
+    '轻量音频 DSP': 'Light audio DSP',
+    '语音唤醒 + 音频解码': 'Voice wake + audio decoding',
+    '标准音频 DSP': 'Standard audio DSP',
+    '空间音频、低功耗拾音': 'Spatial audio, low-power capture',
+    '旗舰音频 DSP': 'Flagship audio DSP',
+    '实时降噪、多路混音': 'Real-time noise reduction, multi-channel mixing',
+    'PCIe 6.0 控制器': 'PCIe 6.0 controller',
+    '外设 / 存储连接': 'Peripheral / storage link',
+    'D2D 裸片互连': 'D2D die interconnect',
+    '多 die 拼接，带宽密度最高': 'Multi-die assembly with highest bandwidth density',
+    '片上 Fabric': 'On-chip fabric',
+    '核间高速通路': 'High-speed core-to-core path',
+
+    /* ---------- data: xdie ---------- */
+    '有机基板互连': 'Organic substrate interconnect',
+    '有机': 'Organic',
+    '便宜、良率高，但跨 die 延迟高、带宽低': 'Cheap and high-yield, but high cross-die latency and low bandwidth',
+    '硅桥 (EMIB)': 'Silicon bridge (EMIB)',
+    '硅桥': 'Bridge',
+    '局部高密度互连，成本和性能的折中': 'Local high-density interconnect — a cost/performance compromise',
+    '硅中介层': 'Silicon interposer',
+    '中介层': 'Interposer',
+    '整片硅中介层，高带宽，贵且封装复杂': 'Full silicon interposer — high bandwidth, expensive and complex packaging',
+    '裸片边缘直连，路径最短、带宽密度最高': 'Direct die-edge link — shortest path and highest bandwidth density',
+    '线性串联': 'Linear chain',
+    '相邻 die 直连，结构最简单；远端要跳几跳': 'Adjacent dies connect directly — simplest topology, but far dies need multiple hops',
+    '环形互连': 'Ring',
+    '首尾也连上，任意 die 最多绕半圈': 'Ends are linked too — any die is at most half a ring away',
+    '网格互连': 'Mesh',
+    '横竖相邻都连，适合 2×2 拼接': 'Connects horizontal and vertical neighbors — ideal for 2×2 assemblies',
+    '全连接': 'All-to-all',
+    '每两块 die 都直连，效率最高、走线最多': 'Every die pair connects directly — highest efficiency, most routing',
+
+    /* ---------- data: SLC / cooling ---------- */
+    '意思一下': 'Token amount',
+    '中端机水平': 'Mid-range level',
+    '主流旗舰': 'Mainstream flagship',
+    '游戏本入门': 'Entry gaming laptop',
+    '旗舰标配': 'Flagship standard',
+    '桌面级': 'Desktop-class',
+    '堆到顶点': 'Maxed out',
+    '裸奔（无散热）': 'Bare die (no cooling)',
+    '芯片对着空气叹气': 'The chip sighs at the air',
+    '石墨烯贴片': 'Graphene sheet',
+    '中端机常规操作': 'Standard for mid-range phones',
+    'VC 均热板': 'VC vapor chamber',
+    '旗舰标配，5000mm² 起': 'Flagship standard, 5000mm² and up',
+    '主动风冷': 'Active air cooling',
+    '游戏手机 / 散热背夹': 'Gaming phones / cooling clips',
+    '半导体制冷': 'Peltier cooler',
+    '物理外挂，冬天会结霜': 'Physical cheat — frosts over in winter',
+    '原装下压散热器': 'Stock downdraft cooler',
+    '买 CPU 送的那种': 'The one bundled with the CPU',
+    '单塔风冷': 'Single-tower air cooler',
+    '百元级，压得住': 'Budget tier, gets the job done',
+    '双塔风冷': 'Dual-tower air cooler',
+    'DIY 标配': 'DIY standard',
+    '240 一体水冷': '240mm AIO',
+    '安静且稳': 'Quiet and stable',
+    '360 一体水冷': '360mm AIO',
+    '大力出奇迹': 'Brute force works wonders',
+    '1U 被动散热片': '1U passive heatsink',
+    '数据中心里的铁疙瘩': 'The metal brick in the datacenter',
+    '1U 高静压风冷': '1U high-static-pressure fan',
+    '风扇起飞，戴耳机': 'Fans take off — wear headphones',
+    '2U 风冷': '2U air cooling',
+    '机架常规操作': 'Standard rack practice',
+    '冷板液冷': 'Cold-plate liquid cooling',
+    'CDU 供水管路': 'CDU supply loop',
+    '浸没式液冷': 'Immersion liquid cooling',
+    '整机泡在氟化液里': 'Whole system submerged in fluorocarbon fluid',
+    '极限液氮': 'Extreme LN2',
+    '顶部封装直触铜制散热头 · -196°C 液氮 · 极限跑分专用': 'Direct-die copper pot · −196°C liquid nitrogen · extreme benchmarking only',
+
+    /* ---------- data: reference chips ---------- */
+    '骁龙 888': 'Snapdragon 888',
+    '骁龙 8 Gen 2': 'Snapdragon 8 Gen 2',
+    '骁龙 8 Elite Gen 6': 'Snapdragon 8 Elite Gen 6',
+    '天玑 9000+': 'Dimensity 9000+',
+    '天玑 9300': 'Dimensity 9300',
+    '天玑 9400': 'Dimensity 9400',
+    '骁龙 8 至尊版': 'Snapdragon 8 Elite',
+    '天玑 9500': 'Dimensity 9500',
+    '第五代骁龙 8 至尊版': 'Snapdragon 8 Elite Gen 5',
+    '骁龙 8cx Gen 3': 'Snapdragon 8cx Gen 3',
+    '骁龙 X Elite X1E-84-100': 'Snapdragon X Elite X1E-84-100',
+    '骁龙 X2 Elite': 'Snapdragon X2 Elite',
+    '骁龙 X2 Plus': 'Snapdragon X2 Plus',
+    '骁龙 X2E-80-100': 'Snapdragon X2E-80-100',
+    '华为鲲鹏 920': 'Huawei Kunpeng 920',
+    '4×X4 + 4×A720（全大核）': '4×X4 + 4×A720 (all big cores)',
+    '2×O3-Prime + 6×O3-Perf（工程机）': '2×O3-Prime + 6×O3-Perf (engineering sample)',
+    '12×Oryon1（Galaxy Book4 Edge 实测）': '12×Oryon1 (measured on Galaxy Book4 Edge)',
+    '10×Oryon 3（CES 参考设计）': '10×Oryon 3 (CES reference design)',
+    'Oryon 3 · 百度百科引述，谨慎参考': 'Oryon 3 · Baidu Baike citation, use with caution',
+    '192 核自研': '192 custom cores',
+
+    /* ---------- data: segments ---------- */
+    '移动端 SoC': 'Mobile SoC',
+    '手机 / 平板。面积小、功耗墙低、散热靠均热板 —— 每一格都得抠。': 'Phones and tablets. Small area, low power limit, vapor-chamber cooling — every cell counts.',
+    '入门版 7×7 ~ 旗舰版 14×14 · 功耗墙 3~22W · 温度墙 92°C': 'Entry 7×7 to flagship 14×14 · 3–22W power limit · 92°C thermal limit',
+    '入门': 'Entry',
+    '7×7 小方糖': '7×7 Cube',
+    '电视盒子与百元机': 'TV boxes and budget phones',
+    '中端': 'Mid-range',
+    '8×8 甜点位': '8×8 Sweet Spot',
+    '良率高、成本舒服': 'High yield, comfortable cost',
+    '次旗舰': 'Sub-flagship',
+    '10×10 标准盘': '10×10 Standard',
+    '塞得下旗舰 CPU': 'Fits a flagship CPU',
+    '旗舰': 'Flagship',
+    '12×12 大饼': '12×12 Big Wafer',
+    'Arm 旗舰的常规尺寸': 'Typical Arm flagship size',
+    '怪兽': 'Monster',
+    '14×14 巨无霸': '14×14 Behemoth',
+    '良率开始肉疼': 'Yields start to hurt',
+    '百元机守门员': 'Budget Gatekeeper',
+    '这芯片……能开机就算赢。': 'This chip... if it boots, that is a win.',
+    '中端良心': 'Mid-range Hero',
+    '日常够用，别碰原神就行。': 'Fine for daily use — just avoid Genshin.',
+    '稳稳的高端，发布会可以吹。': 'Solid high-end — worth bragging about on stage.',
+    '真·旗舰，进得了 DXO 榜单。': 'A true flagship — DXOMARK material.',
+    '机皇': 'Phone King',
+    '年度最强，友商连夜改 PPT。': 'Best of the year — rivals will rewrite their slides overnight.',
+    '外星科技': 'Alien Tech',
+    'ARM 的荣光，由你重振。': 'The glory of ARM, restored by you.',
+    '桌面端处理器': 'Desktop Processor',
+    '笔记本 / 台式机。面积翻倍、功耗墙上探到 200W+，风扇压得住就敢放开跑。': 'Laptops and desktops. Double the area, power limits above 200W — let it rip if the cooler holds.',
+    '面积 144~400mm² · 功耗墙 15~250W · 温度墙 100°C': '144–400mm² area · 15–250W power limit · 100°C thermal limit',
+    '轻薄本': 'Thin & Light',
+    '12×12 小钢炮': '12×12 Pocket Rocket',
+    '低功耗笔记本': 'Low-power laptops',
+    '全能本': 'All-round',
+    '14×14 全能盘': '14×14 All-rounder',
+    '主流轻薄本': 'Mainstream thin-and-light',
+    '标压': 'High-performance',
+    '16×16 高性能': '16×16 High Performance',
+    '游戏本 / 迷你主机': 'Gaming laptops / mini PCs',
+    '桌面': 'Desktop',
+    '18×18 桌面级': '18×18 Desktop-class',
+    '台式机主力': 'Main desktop workhorse',
+    '发烧': 'Enthusiast',
+    '20×20 发烧友': '20×20 Enthusiast',
+    '面积管够，电费另算': 'Plenty of area — electricity billed separately',
+    '会议室上网机': 'Meeting Room Web Browser',
+    '能开 Excel，别难为它了。': 'It can open Excel — do not ask for more.',
+    '轻薄本芯': 'Thin-and-Light Chip',
+    '续航优秀，性能……你懂。': 'Great battery life. Performance... you know.',
+    '高性能本': 'High-performance Laptop',
+    '能跑编译，风扇有点响。': 'Compiles code; the fan is a bit loud.',
+    '桌面旗舰': 'Desktop Flagship',
+    '台式机里的一条好汉。': 'A fine warrior among desktops.',
+    '性能怪兽': 'Performance Monster',
+    '跑分榜上的常客。': 'A regular on benchmark charts.',
+    '架构奇迹': 'Architectural Miracle',
+    'ARM 上桌面，终于扬眉吐气。': 'ARM on desktop — finally vindicated.',
+    '服务器处理器': 'Server Processor',
+    '机架 / 数据中心。面积最大、核数最多、能效优先 —— 持续性能比峰值重要得多。': 'Racks and datacenters. Biggest area, most cores, efficiency first — sustained performance matters far more than peak.',
+    '面积 256~576mm² · 功耗墙 40~500W · 温度墙 95°C': '256–576mm² area · 40–500W power limit · 95°C thermal limit',
+    '单路入门': 'Single-socket Entry',
+    '16×16 入门节点': '16×16 Entry Node',
+    '纯计算节点': 'Pure compute node',
+    '单路主力': 'Single-socket Mainstream',
+    '18×18 单路主力': '18×18 Mainstream',
+    '双通道 DDR': 'Dual-channel DDR',
+    '双路': 'Dual-socket',
+    '20×20 双路盘': '20×20 Dual-socket',
+    '八通道 DDR': 'Eight-channel DDR',
+    '高密度': 'High Density',
+    '22×22 高密度': '22×22 High Density',
+    '核多就是王道': 'More cores is always better',
+    '24×24 机架怪兽': '24×24 Rack Monster',
+    '电力和散热都是成本': 'Power and cooling are both costs',
+    '淘汰边缘': 'E-waste Candidate',
+    '这算力，还是回去做 NAS 吧。': 'With this compute, go back to building a NAS.',
+    '入门节点': 'Entry Node',
+    '能跑点轻量容器。': 'Can run a few light containers.',
+    '数据中心主力': 'Datacenter Workhorse',
+    '机架里最兢兢业业的那一批。': 'One of the hardest-working chips in the rack.',
+    '机架霸主': 'Rack Overlord',
+    '一颗顶别人两颗。': 'One chip does the work of two.',
+    '算力猛兽': 'Compute Beast',
+    '每瓦性能优秀，运维都夸你。': 'Excellent performance per watt — ops will thank you.',
+    '超算级': 'Supercomputer-class',
+    'ARM 在数据中心的天花板，被你捅穿了。': 'You just punched through ARM’s datacenter ceiling.',
+
+    /* ---------- data: kinds ---------- */
+    'CPU 集群': 'CPU Cluster',
+    'GPU 集群': 'GPU Cluster',
+    '基带 / 射频': 'Modem / RF',
+    '全部合计': 'total',
+    '解码力': 'decode throughput',
+    '基带': 'Modem',
+    '内存控制器': 'Memory Controller',
+    'ISP 影像': 'ISP / Camera',
+    '视频编解码': 'Video Codec',
+    '音频 DSP': 'Audio DSP',
+    '高速连接': 'High-speed I/O',
+    '系统缓存 SLC': 'System Cache SLC',
+    '互连 NoC': 'NoC Interconnect',
+    'NoC': 'NoC',
+    'GPU': 'GPU',
+    'CPU': 'CPU',
+
+    /* ---------- misc ---------- */
+    '无': 'None',
+    '个': '',
+    '块': '',
+    '颗': '',
+    '格': 'cells',
+    '路': 'streams',
+    '分': 'pts',
+    '当前': 'Current',
+    '全部': 'All',
+    '选择': 'Select',
+    '已选': 'Selected',
+    '需要': 'needs',
+    '共': 'Total',
+    '其中': 'including',
+    '为了补成矩形多付的面积': 'area paid to complete the rectangle',
+    '一点面积都没浪费': 'no wasted area at all',
+    '当前 ': 'Current ',
+    '个待放置': 'unplaced',
+    '处冲突': 'conflicts',
+    '版图合法': 'Floorplan valid',
+    '缺少：': 'Missing: ',
+    '拖拽左侧「待放置」到裸片，或先点它再点裸片': 'Drag an Unplaced block onto the die, or click it then click the die',
+    '还没有 CPU 核心': 'No CPU cores yet',
+    '颗 CPU 核心！多核会很好看，但持续功耗要散热兜住。': ' CPU cores! Multi-core will look great, but sustained power needs serious cooling.',
+    '多核会很好看，但持续功耗要散热兜住。': 'Multi-core will look great, but sustained power needs serious cooling.',
+    '单核跑分榜（不是）': 'the single-core leaderboard (not)',
+    '这是单核跑分榜（不是）': 'This is the single-core leaderboard (not).',
+    '桌面/服务器可以，手机就别想了。': 'Fine for desktop/server, impossible for phones.',
+    '发布会现场会被弹幕刷屏。': 'The launch stream will be flooded with complaints.',
+    '支持卫星通信，可以在珠峰发朋友圈。': 'Satellite communication supported — post from Everest.',
+    '极限液氮：θ=0.02 K/W，芯片被按在室温附近，持续性能基本等于峰值；现实中会结霜/凝露，别在家试。': 'Extreme LN2: θ=0.02 K/W keeps the chip near room temperature, so sustained performance nearly equals peak; in reality it frosts and condenses — do not try this at home.',
+    '裸片太大或制程太新，成本炸了。': 'The die is too large or the node too new — costs exploded.',
+    '多 die 的良率是逐块相乘的，': 'Multi-die yield multiplies per die, ',
+    '超频空间很大（欧皇）。': 'plenty of overclocking headroom (lucky silicon).',
+    '超频一碰就翻车（非酋）。': 'overclocking crashes instantly (unlucky silicon).',
+    '峰值温度': 'Peak temperature',
+    '跑分时已经贴着温度墙了。': 'it is already hugging the thermal limit during the run.',
+    '典型的「跑分一条龙、游戏一条虫」。': 'the classic “benchmark hero, gaming zero”.',
+    '峰值与持续几乎一致，散热调校优秀，值得在 PPT 上放大。': 'Peak and sustained are nearly identical — excellent cooling tuning, worth a big slide.',
+    '多 die 拼接：': 'Multi-die assembly: ',
+    '块 die，互连质量 Q=': ' dies, interconnect quality Q=',
+    '，多核跨 die 效率 ': ', multi-core cross-die efficiency ',
+    '，GPU 跨 die 效率 ': ', GPU cross-die efficiency ',
+    '。': '.',
+    '互连质量偏低 —— 有机基板 + 线性拓扑会让远端 die 的核互相拖后腿，试试硅桥 / 中介层或环形 / 全连接。': 'Interconnect quality is low — an organic substrate with linear topology makes far dies drag each other down. Try a silicon bridge / interposer or ring / all-to-all topology.',
+    '互连质量优秀，跨 die 的带宽和延迟都压得住，拼接效率接近单片。': 'Excellent interconnect quality — cross-die bandwidth and latency are under control, nearly matching a monolithic die.',
+    '还有 ': 'There are still ',
+    ' 个模块没放上裸片，它们不参与跑分。': ' unplaced blocks; they do not contribute to the score.',
+    '版图有 ': 'The floorplan has ',
+    ' 处问题（重叠/越界/面积不足），流片会废片。': ' problems (overlap / out-of-bounds / insufficient area) — tape-out will fail.',
+    '裸片只用了 ': 'The die is only ',
+    '%，面积在浪费，良率白白损失。': '% utilized — area and yield are being wasted.',
+    '利用率 ': 'Utilization ',
+    '%，布线（routing）压力很大。': '% — routing pressure is severe.',
+    '⚠️ 一块内存控制器都没放，带宽归零，多核和 GPU 直接断粮。': '⚠️ No memory controller at all — bandwidth is zero and both multi-core and GPU are starved.',
+    '只有一块内存控制器（': 'Only one memory controller (',
+    'GB/s），再堆一块能再拉一波带宽。': 'GB/s) — add another to raise bandwidth again.',
+    ' 块内存控制器堆出 ': ' memory controllers deliver ',
+    'GB/s —— 不过总线带宽会开始吃紧。': 'GB/s — but the bus starts to strain.',
+    '⚠️ 没有 SLC 系统缓存，CPU 访问内存全靠远距离搬运，又慢又费电。': '⚠️ No SLC system cache — CPU memory access travels far, slowly and inefficiently.',
+    'SLC 离 CPU 太远了（平均局部性仅 +': 'SLC is too far from the CPU (average locality only +',
+    '%）—— 把大核往缓存旁边攒。': '%) — cluster big cores next to the cache.',
+    'CPU 紧贴着 SLC 布局，缓存局部性 +': 'CPU cores hug the SLC — cache locality +',
+    '%，这才是旗舰该有的版图。': '% — this is a flagship-grade floorplan.',
+    '没有 NPU，端侧 AI 全靠 CPU 硬算。': 'No NPU — on-device AI is brute-forced by the CPU.',
+    '没有 ISP —— 摄像头只能靠 CPU 软处理，拍照 / 录像基本就废了。': 'No ISP — the camera must be software-processed; photos and video are basically ruined.',
+    'ISP 只有 ': 'ISP has only ',
+    ' GPix/s，单摄日常能应付，多摄就排队了。': ' GPix/s — fine for one camera, but multiple cameras queue up.',
+    'ISP 堆到 ': 'ISP stacked to ',
+    ' GPix/s，多摄并行、8K 录制都吃得下。': ' GPix/s — multi-camera and 8K recording are covered.',
+    '没有视频解码器 —— 看个 4K 视频都要 CPU 软解，续航会很难看。': 'No video decoder — even 4K playback needs software decoding, and battery life suffers.',
+    '没有音频 DSP，语音唤醒和音频解码都压在 CPU 上（待机耗电的常见原因）。': 'No audio DSP — voice wake and audio decoding run on the CPU (a common standby-drain cause).',
+    '高速连接只有 ': 'High-speed I/O is only ',
+    'GB/s，把它拉长一点，多核与 GPU 才能吃得饱。': 'GB/s — stretch it so multi-core and GPU can be fed properly.',
+    '高速连接堆到 ': 'High-speed I/O stacked to ',
+    'GB/s，核间与 GPU 的数据通路彻底吃饱了。': 'GB/s — core and GPU data paths are fully fed.',
+    '省掉了 NoC 互连，多核与 GPU 数据通路吃亏。': 'NoC interconnect was skipped — multi-core and GPU data paths suffer.',
+    '只有一颗 CPU 核心？': 'Only one CPU core? ',
+    ' 颗 CPU 核心！多核会很好看，但持续功耗要散热兜住。': ' CPU cores! Multi-core will look great, but sustained power needs serious cooling.',
+    '多核扩展：': 'Multi-core scaling: ',
+    ' 核 → ': ' cores → ',
+    '效率 ': ' efficiency ',
+    '%，SLC ': '%, SLC ',
+    ' MB/核，平均局部性 +': ' MB/core, average locality +',
+    '%。': '%.',
+    'SLC 局部性等效额外 ': 'SLC locality is equivalent to ',
+    ' 格缓存，单核性能吃到了一点甜头。': ' extra cache cells — single-core performance got a small boost.',
+    'GPU 堆到 MP': 'GPU stacked to MP',
+    '，面积和功耗都要起飞了。': ' — area and power are about to take off.',
+    '不装基带 —— 桌面/服务器可以，手机就别想了。': 'No modem — fine for desktop/server, unthinkable for phones.',
+    '只有 4G……发布会现场会被弹幕刷屏。': '4G only... the launch stream will be flooded with complaints.',
+    '支持卫星通信，可以在珠峰发朋友圈。': 'Satellite communication supported — post from Everest.',
+    '极限液氮：θ=0.02 K/W，芯片被按在室温附近，持续性能基本等于峰值；现实中会结霜/凝露，别在家试。': 'Extreme LN2: θ=0.02 K/W keeps the chip near room temperature, so sustained performance nearly equals peak; in reality it frosts and condenses — do not try this at home.',
+    '封装良率仅 ': 'Package yield is only ',
+    '%，': '%, ',
+    '裸片太大或制程太新，成本炸了。': 'the die is too large or the node too new — costs exploded.',
+    '这颗硅的 CPU 体质 ': 'This silicon’s CPU quality is ',
+    '%，超频空间很大（欧皇）。': '% — plenty of overclocking headroom (lucky).',
+    'CPU 体质只有 ': 'CPU quality is only ',
+    '%，超频一碰就翻车（非酋）。': '% — overclocking crashes instantly (unlucky).',
+    '峰值温度 ': 'Peak temperature ',
+    '°C，跑分时已经贴着温度墙了。': '°C — already hugging the thermal limit during the run.',
+    '持续性能只有峰值的 ': 'Sustained performance is only ',
+    '%，典型的「跑分一条龙、游戏一条虫」。': '% of peak — the classic “benchmark hero, gaming zero”.',
+    '峰值与持续几乎一致，散热调校优秀，值得在 PPT 上放大。': 'Peak and sustained are nearly identical — excellent cooling tuning, worth a big slide.',
+    '多 die 拼接：': 'Multi-die assembly: ',
+    ' 块 die，互连质量 Q=': ' dies, interconnect quality Q=',
+    '%，多核跨 die 效率 ': '%, multi-core cross-die efficiency ',
+    '%，GPU 跨 die 效率 ': '%, GPU cross-die efficiency ',
+    '%。': '%.',
+
+    /* ---------- help / dynamic leftovers ---------- */
+    '已切换为 ': 'Switched to ',
+    ' die': ' die',
+    '，新 die 已准备好': ' — the new die is ready',
+    '，多出的 die 及其版图已移除': ' — extra dies and their floorplans were removed',
+    '已切换到「': 'Switched to “',
+    '」，上一版的选择与版图已清空': '” — previous selections and floorplan were cleared',
+    '新芯片：版图已清空，先选版型与面积': 'New chip: floorplan cleared. Choose platform and area first.',
+    '已自动布局': 'Auto-placed',
+    '已自动布局全部 die': 'Auto-placed all dies',
+    '这里放不下，换个位置': 'Does not fit here — try another spot',
+    '这里放不下': 'Does not fit here',
+    '放好了，还剩 ': 'Placed — ',
+    ' 个': ' left',
+    '放置完成': 'Placement complete',
+    '已加入待放置 —— 拖到裸片上，或先点它再点裸片': 'Added to Unplaced — drag it onto the die, or click it then click the die',
+    '已添加 ': 'Added ',
+    ' 个，并自动铺开': ' units and auto-placed them',
+    '点一下裸片上的空位放下它': 'Click an empty spot on the die to place it',
+    '已取消放置，它还在待放置区': 'Placement cancelled — it is still in Unplaced',
+    '已删除 ': 'Deleted ',
+    '，面积释放 ': ', freed ',
+    'mm²': 'mm²',
+    '已删除': 'Deleted',
+    '已转成 ': 'Rotated to ',
+    '这个位置转不开，先挪个地方再转': 'It cannot rotate here — move it first',
+    '正方形，横竖一样宽': 'It is square — width and height are equal',
+    '先选中一个模块再转': 'Select a block first',
+    '先选中一个模块': 'Select a block first',
+    '已合并成 ': 'Merged into ',
+    ' 的 GPU 区域（': ' GPU region (',
+    '，补空缺多付 ': ', extra cells to fill: ',
+    '，一点没浪费': ', zero waste',
+    '不能合并': 'Cannot merge',
+    '这些 GPU 不能合并': 'These GPUs cannot be merged',
+    '选区里至少要有 2 块 GPU': 'The selection needs at least 2 GPUs',
+    '选区里没有合并过的 GPU': 'No merged GPU in the selection',
+    '选区里没有模块': 'No blocks in the selection',
+    '已删除选区内 ': 'Deleted ',
+    ' 个模块，释放 ': ' blocks, freed ',
+    ' 个副本已放进待放置区': ' copies moved to Unplaced',
+    '已按原排版复制 ': 'Copied ',
+    ' 个模块 —— 选区跟到了副本上，可以连着贴': ' blocks with the original layout — selection follows the copy, so you can paste again',
+    '剩余空间不足，': 'Not enough free space — ',
+    '已框选 ': 'Selected ',
+    ' 个模块': ' modules',
+    '（含 ': ' (with ',
+    ' 块 GPU，可合并）': ' GPUs, mergeable)',
+    '这块区域里没有模块': 'No blocks in this region',
+    '已进入选区：拖动圈住模块，松手后可合并 / 复制 / 删除': 'Selection mode: drag to enclose blocks, then merge / copy / delete on release',
+    '已整体搬走 ': 'Moved ',
+    ' 个模块（相对排版不变）': ' blocks as a group (relative layout preserved)',
+    '那里放不下整块选区，已退回原位': 'The whole selection does not fit there — returned to its original position',
+    '放不下整块选区': 'The whole selection does not fit',
+    '已恢复默认尺寸 ': 'Restored default size ',
+    ' —— 空位不够时会自动变形': ' — it auto-fits when space is tight',
+    '空位塞不下默认尺寸，已自适应成 ': 'Default size does not fit — auto-fitted to ',
+    ' 放入': ' and placed',
+    '已自适应成 ': 'Auto-fitted to ',
+    ' 塞进空位 —— 拖出去就恢复默认尺寸': ' to fit — drag it out to restore the default size',
+    '余量 ': 'Spare ',
+    ' 格 → 缓存加成 +': ' cells → cache bonus +',
+    '不能再小了，物理面积兜不住': 'Cannot shrink further — below the physical minimum',
+    '这里放不下这么大的块': 'A block this large does not fit here',
+    '尺寸改为 ': 'Size changed to ',
+    ' 已达物理下限': ' — physical minimum reached',
+    '已到物理面积下限（': 'Physical area minimum reached (',
+    ' 格）': ' cells)',
+    '放不下了，已重新安排位置': 'No longer fits — repositioned',
+    'CPU 核心面积固定，只能横竖对调（按 R）': 'CPU core area is fixed — press R to swap width and height',
+    'SLC 容量 → ': 'SLC capacity → ',
+    ' MB（需要 ': ' MB (needs ',
+    ' 格）': ' cells)',
+    '已切换到暗灰主题': 'Switched to dark theme',
+    '已切换到浅色主题': 'Switched to light theme',
+    '已开启液态玻璃折射': 'Liquid-glass refraction enabled',
+    '已降级为纯模糊（省电模式）': 'Fell back to plain blur (power-saving mode)',
+    '图片已开始下载': 'Image download started',
+    '导出失败，请长按图片保存': 'Export failed — long-press the image to save',
+    '裸片上还没有模块，先摆点东西再分享': 'No blocks on the die yet — place something before sharing',
+    '先跑一次成功的分，再来分享成绩': 'Complete a successful benchmark before sharing the score',
+    '规格文案已复制': 'Spec sheet copied',
+    '发布会文案已复制': 'Launch copy copied',
+    '复制失败': 'Copy failed',
+    '浏览器不支持复制': 'This browser does not support copying',
+    '重新抽了一颗硅': 'Silicon rerolled',
+    '版图还有 ': 'The floorplan still has ',
+    ' 处问题需要先解决': ' problems to fix first',
+    '点击型号加入「待放置」': 'Click a model to add it to Unplaced',
+    '跑分算法/散热模型已更新到 v15.3，旧成绩已失效，请重新跑分': 'Benchmark/thermal model updated to v15.3 — old scores are invalid. Please run again.',
+    '已重新安排位置': 'Repositioned',
+    '温度': 'temperature'
+  };
+
+  /* 动态句式的兜底翻译：顺序敏感，先精确后模糊 */
+  var PATTERNS = [
+    [/^(.*?) · (整颗|单核) (.*?)mm² · 上限 (.*?)( · 光追)?$/, function (m) { return m[1] + ' · ' + tr(m[2]) + ' ' + m[3] + 'mm² · max ' + m[4] + (m[5] ? ' · ' + tr('光追') : ''); }],
+    [/^已合并成 (.*?) 的 GPU 区域（(\d+)×(\d+)）(?:，补空缺多付 (\d+) 格|，一点没浪费)$/, function (m) { return 'Merged into a ' + m[1] + ' GPU region (' + m[2] + '×' + m[3] + ')' + (m[4] ? ', ' + m[4] + ' extra cells to fill' : ', zero waste'); }],
+    [/^(\d+) 处冲突$/, function (m) { return m[1] + (+m[1] === 1 ? ' conflict' : ' conflicts'); }],
+    [/^MP(\d+) 合并$/, function (m) { return 'MP' + m[1] + ' merged'; }],
+    [/^拆分成 (\d+) 个独立核心$/, function (m) { return 'Split into ' + m[1] + ' independent cores'; }],
+    [/^互连拓扑 → (.*)$/, function (m) { return 'Interconnect topology → ' + m[1]; }],
+    [/^全部链接 → (.*)$/, function (m) { return 'All links → ' + m[1]; }],
+    [/^已添加 (\d+) 个，并自动铺开$/, function (m) { return 'Added ' + m[1] + ' units and auto-placed them'; }],
+    [/^已拆回 (\d+) 个独立核心，重新安排了位置$/, function (m) { return 'Split into ' + m[1] + ' independent cores and repositioned them'; }],
+    [/^已按原排版复制 (\d+) 个模块 —— 选区跟到了副本上，可以连着贴$/, function (m) { return 'Copied ' + m[1] + ' blocks with the original layout — selection follows the copy, so you can paste again'; }],
+    [/^剩余空间不足，(\d+) 个副本已放进待放置区$/, function (m) { return 'Not enough free space — ' + m[1] + ' copies moved to Unplaced'; }],
+    [/^已到物理面积下限（(\d+) 格）$/, function (m) { return 'Physical area minimum reached (' + m[1] + ' cells)'; }],
+    [/^版图还有 (\d+) 处问题需要先解决$/, function (m) { return 'The floorplan still has ' + m[1] + ' problems to fix first'; }],
+    [/^先把它放上裸片才能合并$/, function () { return 'Place it on the die before merging'; }],
+    [/^目前只支持合并 GPU 核心$/, function () { return 'Only GPU cores can be merged right now'; }],
+    [/^([\d,.]+) 分$/, function (m) { return m[1] + ' pts'; }],
+    [/^(\d+) die 封装$/, function (m) { return m[1] + '-die package'; }],
+    [/^■ 温度 °C$/, function () { return '■ Temp °C'; }],
+    [/^■ 功耗 W$/, function () { return '■ Power W'; }],
+    [/^■ 频率保持率$/, function () { return '■ Clock retention'; }],
+    [/^(\d{4}) · (.*?)（↓([\d.]+)G）$/, function (m) { return m[1] + ' · ' + m[2] + ' (↓' + m[3] + 'G)'; }],
+    [/^(.*?)（([\d.]+)GB\/s）$/, function (m) { return m[1] + ' (' + m[2] + 'GB/s)'; }],
+    [/^(\d+)GB\/s 每格 · 默认 (\d+)×(\d+) · ¥([\d.]+)\/格$/, function (m) { return m[1] + 'GB/s per cell · default ' + m[2] + '×' + m[3] + ' · ¥' + m[4] + '/cell'; }],
+    [/^距 SLC ([\d.]+) 格 → 局部性 \+([\d.]+)%$/, function (m) { return 'SLC distance ' + m[1] + ' cells → locality +' + m[2] + '%'; }],
+    [/^(.*) —— 建议降频或加压$/, function (m) { return tr(m[1]) + ' — lower clocks or raise voltage'; }],
+    [/^(.*) · 多 die 热阻 \+(\d+)%$/, function (m) { return m[1] + ' · multi-die thermal resistance +' + m[2] + '%'; }],
+    [/^每片晶圆出片（单 die）$/, function () { return 'Dies per wafer (per die)'; }],
+    [/^互连 (.*)$/, function (m) { return 'Interconnect ' + m[1]; }],
+    [/^(.*) · 单 die 良率 ([\d.]+%)$/, function (m) { return m[1] + ' · per-die yield ' + m[2]; }],
+    [/^逐块相乘 · (\d+) die$/, function (m) { return 'multiplied per die · ' + m[1] + ' die'; }],
+    [/^合并 GPU ×(\d+)$/, function (m) { return 'Merge GPUs ×' + m[1]; }],
+    [/^(.*?) · 上限 (.*?)( · SME2)?$/, function (m) { return m[1] + ' · max ' + m[2] + (m[3] || ''); }],
+    [/^(.*?) · (整颗|单核) (.*?)mm² · 上限 (.*?)( · 光追)?$/, function (m) { return m[1] + ' · ' + tr(m[2]) + ' ' + m[3] + 'mm² · max ' + m[4] + (m[5] || ''); }],
+    [/^· (.*) · 互连质量$/, function (m) { return '· ' + m[1] + ' · interconnect quality'; }],
+    [/^· 多核跨 die 效率$/, function () { return '· multi-core cross-die efficiency'; }],
+    [/^· GPU 跨 die 效率$/, function () { return '· GPU cross-die efficiency'; }],
+    [/^本次链接：(.*)$/, function (m) { return 'Links: ' + m[1]; }],
+    [/^([\d.]+ GB\/s) · ([\d.]+mm²)\/块 · ¥([\d.]+)$/, function (m) { return m[1] + ' · ' + m[2] + '/block · ¥' + m[3]; }],
+    [/^(\d+) TOPS · ([\d.]+mm²)\/块 · ¥([\d.]+)$/, function (m) { return m[1] + ' TOPS · ' + m[2] + '/block · ¥' + m[3]; }],
+    [/^([\d.]+mm²)\/块 · 全部合计 (\d+) MB$/, function (m) { return m[1] + '/block · total ' + m[2] + ' MB'; }],
+    [/^([\d.]+ GPix\/s) · ([\d.]+mm²)\/块 · ¥([\d.]+) · (.*)$/, function (m) { return m[1] + ' · ' + m[2] + '/block · ¥' + m[3] + ' · ' + m[4]; }],
+    [/^解码力 (\d+)$/, function (m) { return 'Decode throughput ' + m[1]; }],
+    [/^解码力 (\d+) · ([\d.]+mm²)\/块 · ¥([\d.]+) · (.*)$/, function (m) { return 'Decode throughput ' + m[1] + ' · ' + m[2] + '/block · ¥' + m[3] + ' · ' + m[4]; }],
+    [/^(\d+) GOPS · ([\d.]+mm²)\/块 · ¥([\d.]+) · (.*)$/, function (m) { return m[1] + ' GOPS · ' + m[2] + '/block · ¥' + m[3] + ' · ' + m[4]; }],
+    [/^(\d+) GB\/s 每格 · 共 (\d+) 格 = (\d+) GB\/s · ¥(\d+)$/, function (m) { return m[1] + ' GB/s per cell · ' + m[2] + ' cells total = ' + m[3] + ' GB/s · ¥' + m[4]; }],
+    [/^([\d.]+) GB\/s \/ 格 · ¥([\d.]+)\/格 · ([\d.]+)W\/格；用下面的 W \/ H 自由拉长拉宽，形状随意。$/, function (m) { return m[1] + ' GB/s per cell · ¥' + m[2] + '/cell · ' + m[3] + 'W/cell; use W / H below to stretch it freely — any shape works.'; }],
+    [/^封装良率 ([\d.]+%)$/, function (m) { return 'Package yield ' + m[1]; }],
+    [/^单颗成本 ¥([\d,]+)$/, function (m) { return 'Unit cost ¥' + m[1]; }],
+    [/^单 die · 单 die 良率 ([\d.]+%)$/, function (m) { return 'Single die · per-die yield ' + m[1]; }],
+    [/^下行 (.*)$/, function (m) { return m[1] + ' downlink'; }],
+    [/^(\d+)\/(\d+) 格$/, function (m) { return m[1] + '/' + m[2] + ' cells'; }],
+    [/^面积固定 (\d+) 格$/, function (m) { return 'Fixed area ' + m[1] + ' cells'; }],
+    [/^体质 CPU (\d+)% · GPU (\d+)%$/, function (m) { return 'Silicon quality CPU ' + m[1] + '% · GPU ' + m[2] + '%'; }],
+    [/^设计值 (.*?) · 安全上限 (.*)$/, function (m) { return 'Design ' + m[1] + ' · safe limit ' + m[2]; }],
+    [/^(\d+)W（(.+)）$/, function (m) { return m[1] + 'W (' + tr(m[2]) + ')'; }],
+    [/^(\d+)°C 温度墙$/, function (m) { return m[1] + '°C thermal limit'; }],
+    [/^CPU (.*) vs 安全线 (.*)（(\d+)%）$/, function (m) { return 'CPU ' + m[1] + ' vs safe limit ' + m[2] + ' (' + m[3] + '%)'; }],
+    [/^GPU (.*) vs 安全线 (.*)（(\d+)%）$/, function (m) { return 'GPU ' + m[1] + ' vs safe limit ' + m[2] + ' (' + m[3] + '%)'; }],
+    [/^当前 vGain ×(.*)$/, function (m) { return 'Current vGain ×' + m[1]; }],
+    [/^峰值 (.*)$/, function (m) { return 'Peak ' + m[1]; }],
+    [/^持续 (.*)$/, function (m) { return 'Sustained ' + m[1]; }],
+    [/^(.*) · 峰值 (.*)$/, function (m) { return m[1] + ' · peak ' + m[2]; }],
+    [/^← 重新超频$/, function () { return '← Re-overclock'; }],
+    [/^← 回去调参数$/, function () { return '← Back to tuning'; }],
+    [/^Geekbench 6 多核 · 与历代旗舰对比$/, function () { return 'Geekbench 6 Multi-Core · vs. flagship history'; }],
+    [/^GFXBench 曼哈顿 3.1（fps）$/, function () { return 'GFXBench Manhattan 3.1 (fps)'; }],
+    [/^CPU 核心占 (\d+) 格（([^）]+)），面积由物理尺寸固定，不能拉伸；只能横竖对调。$/, function (m) { return 'This CPU core occupies ' + m[1] + ' cells (' + m[2] + '); its area is fixed by physics and cannot be stretched — only width/height can be swapped.'; }],
+    [/^(.*)· 物理 (\d+(?:\.\d+)?)mm²$/, function (m) { return m[1] + '· physical ' + m[2] + 'mm²'; }],
+    [/^缺少：(.*)$/, function (m) { return 'Missing: ' + m[1].split('、').map(function (s) { return tr(s); }).join(', '); }],
+    [/^(\d+)×(\d+) 网格 · 每格 1mm² · 空白处拖动可框选$/, function (m) { return m[1] + '×' + m[2] + ' grid · 1mm² per cell · drag empty space to marquee-select'; }],
+    [/^(\d+)格$/, function (m) { return m[1] + ' cells'; }],
+    [/^物理最小 (\d+) 格（([^）]+)）$/, function (m) { return 'Physical minimum ' + m[1] + ' cells (' + m[2] + ')'; }],
+    [/^物理最小 (\d+) 格（([^）]+)） · 余量 (\d+) 格 → 缓存加成\s*$/, function (m) { return 'Physical minimum ' + m[1] + ' cells (' + m[2] + ') · spare ' + m[3] + ' cells → cache bonus '; }],
+    [/^(.+?)可选档位 · 每块 die$/, function (m) { return m[1] + ' available tiers · per die'; }],
+    [/^(\d+) 个待放置$/, function (m) { return m[1] + ' unplaced'; }],
+    [/^(\d+) 处冲突$/, function (m) { return m[1] + ' conflicts'; }],
+    [/^(\d+) 个模块$/, function (m) { return m[1] + ' modules'; }],
+    [/^(\d+) 个$/, function (m) { return m[1]; }],
+    [/^(\d+) 颗$/, function (m) { return m[1]; }],
+    [/^(\d+) 块$/, function (m) { return m[1] + (+m[1] === 1 ? ' block' : ' blocks'); }],
+    [/^(\d+) 块 · (\d+)%$/, function (m) { return m[1] + ' blocks · ' + m[2] + '%'; }],
+    [/^(\d+) 格$/, function (m) { return m[1] + ' cells'; }],
+    [/^(\d+) 格 · (.*)$/, function (m) { return m[1] + ' cells · ' + m[2]; }],
+    [/^(\d+) \/ (\d+) 格 · (\d+)%$/, function (m) { return m[1] + ' / ' + m[2] + ' cells · ' + m[3] + '%'; }],
+    [/^(\d+) 颗 \/ (\d+) 颗$/, function (m) { return m[1] + ' / ' + m[2] + ' cores'; }],
+    [/^(\d+) 颗 · (\d+)%$/, function (m) { return m[1] + ' blocks · ' + m[2] + '%'; }],
+    [/^(\d+) 个模块已放置$/, function (m) { return m[1] + ' modules placed'; }],
+    [/^共 (\d+) 颗$/, function (m) { return m[1] + ' total'; }],
+    [/^共 (\d+) 个已放置单元$/, function (m) { return m[1] + ' placed units'; }],
+    [/^共 (\d+) 个$/, function (m) { return m[1] + ' total'; }],
+    [/^(\d+) 核$/, function (m) { return m[1] + (+m[1] === 1 ? ' core' : ' cores'); }],
+    [/^(\d+) 核心$/, function (m) { return m[1] + (+m[1] === 1 ? ' core' : ' cores'); }],
+    [/^(\d+) 颗 · (\d+) 块 GPU$/, function (m) { return m[1] + ' units · ' + m[2] + ' GPUs'; }],
+    [/^(\d+) 块 GPU$/, function (m) { return m[1] + ' GPUs'; }],
+    [/^(\d+) 块 SLC$/, function (m) { return m[1] + ' SLC blocks'; }],
+    [/^(\d+) 颗 die$/, function (m) { return m[1] + ' dies'; }],
+    [/^MP(\d+)$/, function (m) { return 'MP' + m[1]; }],
+    [/^×?(\d+) 基础 die 拼接$/, function (m) { return '×' + m[1] + ' base-die assembly'; }],
+    [/^(\d+) die$/, function (m) { return m[1] + ' die'; }],
+    [/^当前 (\d+) die · (.*)$/, function (m) { return 'Current ' + m[1] + ' die · ' + m[2]; }],
+    [/^区域 (\d+)×(\d+) 格（X(\d+) Y(\d+)）· 占用 (\d+) 格(?: · 含 (\d+) 块 GPU)?$/, function (m) {
+      return 'Region ' + m[1] + '×' + m[2] + ' cells (X' + m[3] + ' Y' + m[4] + ') · ' + m[5] + ' cells used' + (m[6] ? ' · ' + m[6] + (+m[6] === 1 ? ' GPU' : ' GPUs') : '');
+    }],
+    [/^合并后占 (\d+)×(\d+) = (\d+) 格(?:，其中 (\d+) 格是为了补成矩形多付的面积|，一点面积都没浪费)$/, function (m) {
+      return 'Merged block occupies ' + m[1] + '×' + m[2] + ' = ' + m[3] + ' cells' + (m[4] ? ', including ' + m[4] + ' cells paid to complete the rectangle' : ', zero wasted area');
+    }],
+    [/^可合并：MP(\d+)，占 (\d+)×(\d+) 格(?:，补矩形多付 (\d+) 格|，零浪费)$/, function (m) {
+      return 'Mergeable: MP' + m[1] + ', occupies ' + m[2] + '×' + m[3] + ' cells' + (m[4] ? ', ' + m[4] + ' extra cells to fill the rectangle' : ', zero waste');
+    }],
+    [/^已选 (\d+) 块区域$/, function (m) { return m[1] + ' regions selected'; }],
+    [/^已合并成 MP(\d+) 的 GPU 区域（(\d+)×(\d+)）(?:，补空缺多付 (\d+) 格|，一点没浪费)$/, function (m) {
+      return 'Merged into an MP' + m[1] + ' GPU region (' + m[2] + '×' + m[3] + ')' + (m[4] ? ', ' + m[4] + ' extra cells to fill' : ', zero waste');
+    }],
+    [/^已转成 (\d+)×(\d+)$/, function (m) { return 'Rotated to ' + m[1] + '×' + m[2]; }],
+    [/^尺寸改为 (\d+)×(\d+)(?: → 缓存加成 \+(\d+)%| → 已达物理下限)$/, function (m) {
+      return 'Size changed to ' + m[1] + '×' + m[2] + (m[3] ? ' → cache bonus +' + m[3] + '%' : ' → physical minimum reached');
+    }],
+    [/^余量 (\d+) 格 → 缓存加成 \+(\d+)%$/, function (m) { return 'Spare ' + m[1] + ' cells → cache bonus +' + m[2] + '%'; }],
+    [/^物理最小 (\d+) 格（(.*)）(?: · 余量 (\d+) 格 → 缓存加成 \+?(\d+(?:\.\d+)?)%)?$/, function (m) {
+      return 'Physical minimum ' + m[1] + ' cells (' + m[2] + ')' + (m[3] != null ? ' · spare ' + m[3] + ' cells → cache bonus +' + m[4] + '%' : '');
+    }],
+    [/^已切换为 (\d+) die，多出的 die 及其版图已移除$/, function (m) { return 'Switched to ' + m[1] + ' die — extra dies and their floorplans were removed'; }],
+    [/^已切换为 (\d+) die，新 die 已准备好$/, function (m) { return 'Switched to ' + m[1] + ' die — the new die is ready'; }],
+    [/^已切换到「(.+)」，上一版的选择与版图已清空$/, function (m) { return 'Switched to “' + m[1] + '” — previous selections and floorplan were cleared'; }],
+    [/^已框选 (\d+) 个模块(?:（含 (\d+) 块 GPU，可合并）)?$/, function (m) {
+      return 'Selected ' + m[1] + ' modules' + (m[2] ? ' (including ' + m[2] + ' mergeable GPUs)' : '');
+    }],
+    [/^已删除选区内 (\d+) 个模块，释放 (\d+)mm²$/, function (m) { return 'Deleted ' + m[1] + ' blocks in the selection, freed ' + m[2] + 'mm²'; }],
+    [/^已删除 (\d+) 个模块，释放 (\d+)mm²$/, function (m) { return 'Deleted ' + m[1] + ' modules, freed ' + m[2] + 'mm²'; }],
+    [/^已整体搬走 (\d+) 个模块（相对排版不变）$/, function (m) { return 'Moved ' + m[1] + ' blocks as a group (relative layout preserved)'; }],
+    [/^已加入待放置 —— 拖到裸片上，或先点它再点裸片$/, function () { return 'Added to Unplaced — drag it onto the die, or click it then click the die'; }],
+    [/^已添加 (\d+) 个，并自动铺开$/, function (m) { return 'Added ' + m[1] + ' units and auto-placed them'; }],
+    [/^放好了，还剩 (\d+) 个$/, function (m) { return 'Placed — ' + m[1] + ' left'; }],
+    [/^已删除 (.*)，面积释放 (\d+)mm²$/, function (m) { return 'Deleted ' + m[1] + ', freed ' + m[2] + 'mm²'; }],
+    [/^已取消放置，它还在待放置区$/, function () { return 'Placement cancelled — it is still in Unplaced'; }],
+    [/^空位塞不下默认尺寸，已自适应成 (\d+)×(\d+) 放入$/, function (m) { return 'Default size does not fit — auto-fitted to ' + m[1] + '×' + m[2] + ' and placed'; }],
+    [/^已自适应成 (\d+)×(\d+) 塞进空位 —— 拖出去就恢复默认尺寸$/, function (m) { return 'Auto-fitted to ' + m[1] + '×' + m[2] + ' — drag it out to restore the default size'; }],
+    [/^已恢复默认尺寸 (\d+)×(\d+) —— 空位不够时会自动变形$/, function (m) { return 'Restored default size ' + m[1] + '×' + m[2] + ' — it auto-fits when space is tight'; }],
+    [/^SLC 容量 → (\d+) MB（需要 (\d+) 格）$/, function (m) { return 'SLC capacity → ' + m[1] + ' MB (needs ' + m[2] + ' cells)'; }],
+    [/^正在编辑 Die (\d+)\/(\d+)$/, function (m) { return 'Editing Die ' + m[1] + '/' + m[2]; }],
+    [/^Die (\d+)：(.+)$/, function (m) { return 'Die ' + m[1] + ': ' + m[2]; }],
+    [/^已选 (\d+) 个模块$/, function (m) { return m[1] + ' modules selected'; }],
+    [/^(\d+) 个模块（含 (\d+) 块 GPU）$/, function (m) { return m[1] + ' modules (' + m[2] + ' GPUs)'; }],
+    [/^(\d+) 个模块（含 (\d+) 块 GPU，可合并）$/, function (m) { return m[1] + ' modules (' + m[2] + ' mergeable GPUs)'; }],
+    [/^(\d+) 颗 CPU 核心！多核会很好看，但持续功耗要散热兜住。$/, function (m) { return m[1] + ' CPU cores! Multi-core will look great, but sustained power needs serious cooling.'; }],
+    [/^多核扩展：(\d+) 核 → (.*?)效率 (\d+)%，SLC (\d+(?:\.\d+)?) MB\/核，平均局部性 \+(\d+(?:\.\d+)?)%。$/, function (m) {
+      return 'Multi-core scaling: ' + m[1] + ' cores → ' + m[2] + ' efficiency ' + m[3] + '%, SLC ' + m[4] + ' MB/core, average locality +' + m[5] + '%.';
+    }],
+    [/^SLC 局部性等效额外 (\d+) 格缓存，单核性能吃到了一点甜头。$/, function (m) { return 'SLC locality is equivalent to ' + m[1] + ' extra cache cells — single-core performance got a small boost.'; }],
+    [/^GPU 堆到 MP(\d+)，面积和功耗都要起飞了。$/, function (m) { return 'GPU stacked to MP' + m[1] + ' — area and power are about to take off.'; }],
+    [/^这颗硅的 CPU 体质 (\d+)%，超频空间很大（欧皇）。$/, function (m) { return 'This silicon’s CPU quality is ' + m[1] + '% — plenty of overclocking headroom (lucky).'; }],
+    [/^CPU 体质只有 (\d+)%，超频一碰就翻车（非酋）。$/, function (m) { return 'CPU quality is only ' + m[1] + '% — overclocking crashes instantly (unlucky).'; }],
+    [/^峰值温度 (\d+)°C，跑分时已经贴着温度墙了。$/, function (m) { return 'Peak temperature ' + m[1] + '°C — already hugging the thermal limit during the run.'; }],
+    [/^持续性能只有峰值的 (\d+)%，典型的「跑分一条龙、游戏一条虫」。$/, function (m) { return 'Sustained performance is only ' + m[1] + '% of peak — the classic “benchmark hero, gaming zero”.'; }],
+    [/^封装良率仅 (\d+)%，(多 die 的良率是逐块相乘的，)?(.*)$/, function (m) {
+      return 'Package yield is only ' + m[1] + '%, ' + (m[2] ? 'multi-die yield multiplies per die, ' : '') + m[3];
+    }],
+    [/^还有 (\d+) 个模块没放上裸片，它们不参与跑分。$/, function (m) { return 'There are still ' + m[1] + ' unplaced blocks; they do not contribute to the score.'; }],
+    [/^版图有 (\d+) 处问题（重叠\/越界\/面积不足），流片会废片。$/, function (m) { return 'The floorplan has ' + m[1] + ' problems (overlap / out-of-bounds / insufficient area) — tape-out will fail.'; }],
+    [/^裸片只用了 (\d+)%，面积在浪费，良率白白损失。$/, function (m) { return 'The die is only ' + m[1] + '% utilized — area and yield are being wasted.'; }],
+    [/^利用率 (\d+)%，布线（routing）压力很大。$/, function (m) { return 'Utilization ' + m[1] + '% — routing pressure is severe.'; }],
+    [/^只有一块内存控制器（(\d+(?:\.\d+)?)GB\/s），再堆一块能再拉一波带宽。$/, function (m) { return 'Only one memory controller (' + m[1] + ' GB/s) — add another to raise bandwidth again.'; }],
+    [/^(\d+) 块内存控制器堆出 (\d+(?:\.\d+)?)GB\/s —— 不过总线带宽会开始吃紧。$/, function (m) { return m[1] + ' memory controllers deliver ' + m[2] + ' GB/s — but the bus starts to strain.'; }],
+    [/^SLC 离 CPU 太远了（平均局部性仅 \+(\d+(?:\.\d+)?)%）—— 把大核往缓存旁边攒。$/, function (m) { return 'SLC is too far from the CPU (average locality only +' + m[1] + '%) — cluster big cores next to the cache.'; }],
+    [/^CPU 紧贴着 SLC 布局，缓存局部性 \+(\d+(?:\.\d+)?)%，这才是旗舰该有的版图。$/, function (m) { return 'CPU cores hug the SLC — cache locality +' + m[1] + '%, a flagship-grade floorplan.'; }],
+    [/^ISP 只有 (\d+(?:\.\d+)?) GPix\/s，单摄日常能应付，多摄就排队了。$/, function (m) { return 'ISP has only ' + m[1] + ' GPix/s — fine for one camera, but multiple cameras queue up.'; }],
+    [/^ISP 堆到 (\d+(?:\.\d+)?) GPix\/s，多摄并行、8K 录制都吃得下。$/, function (m) { return 'ISP stacked to ' + m[1] + ' GPix/s — multi-camera and 8K recording are covered.'; }],
+    [/^高速连接只有 (\d+)GB\/s，把它拉长一点，多核与 GPU 才能吃得饱。$/, function (m) { return 'High-speed I/O is only ' + m[1] + ' GB/s — stretch it so multi-core and GPU can be fed properly.'; }],
+    [/^高速连接堆到 (\d+)GB\/s，核间与 GPU 的数据通路彻底吃饱了。$/, function (m) { return 'High-speed I/O stacked to ' + m[1] + ' GB/s — core and GPU data paths are fully fed.'; }],
+    [/^(\d+) 块 die，互连质量 Q=(\d+)%，多核跨 die 效率 (\d+)%，GPU 跨 die 效率 (\d+)%。$/, function (m) {
+      return m[1] + ' dies, interconnect quality Q=' + m[2] + '%, multi-core cross-die efficiency ' + m[3] + '%, GPU cross-die efficiency ' + m[4] + '%.';
+    }],
+    [/^Die (\d+) ↔ Die (\d+)$/, function (m) { return 'Die ' + m[1] + ' ↔ Die ' + m[2]; }],
+    [/^(\d+) 颗 · (\d+)%$/, function (m) { return m[1] + ' blocks · ' + m[2] + '%'; }],
+    [/^(\d+) 颗 · (\d+) 块 GPU$/, function (m) { return m[1] + ' units · ' + m[2] + ' GPUs'; }],
+    [/^(\d+) 块 · (\d+)%$/, function (m) { return m[1] + ' blocks · ' + m[2] + '%'; }],
+    [/^(\d+) 个模块没放上裸片，它们不参与跑分。$/, function (m) { return m[1] + ' unplaced blocks; they do not contribute to the score.'; }],
+    [/^(\d+) 个待放置$/, function (m) { return m[1] + ' unplaced'; }],
+    [/^(\d+) 处冲突$/, function (m) { return m[1] + ' conflicts'; }],
+    [/^容量 (\d+) MB$/, function (m) { return m[1] + ' MB capacity'; }],
+    [/^(\d+) MB ×(\d+)$/, function (m) { return m[1] + ' MB ×' + m[2]; }],
+    [/^(\d+) 路$/, function (m) { return m[1] + ' streams'; }],
+    [/^(\d+) 格$/, function (m) { return m[1] + ' cells'; }]
+  ];
+
+  var EN_NOSPACE = {};
+  Object.keys(EN).forEach(function (k) { EN_NOSPACE[k.replace(/\s+/g, '')] = EN[k]; });
+
+  var lang = 'zh';
+  try { lang = localStorage.getItem('armdynasty.lang') === 'en' ? 'en' : 'zh'; } catch (e) { }
+
+  function norm(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+
+  function tr(s) {
+    if (lang !== 'en' || s == null) return s;
+    var raw = String(s);
+    var key = norm(raw);
+    if (!key) return raw;
+    var out = EN[key];
+    if (out == null) out = EN_NOSPACE[key.replace(/\s+/g, '')];
+    if (out == null) {
+      for (var i = 0; i < PATTERNS.length; i++) {
+        var m = key.match(PATTERNS[i][0]);
+        if (m) { out = PATTERNS[i][1](m); break; }
+      }
+    }
+    if (out == null) return raw;
+    var lead = (raw.match(/^\s*/) || [''])[0];
+    var trail = (raw.match(/\s*$/) || [''])[0];
+    return lead + out + trail;
+  }
+
+  function t(zh, en) { return lang === 'en' ? en : zh; }
+
+  var SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, CODE: 1, PRE: 1, CANVAS: 1 };
+
+  function translateTextNode(node) {
+    if (!node || node.nodeType !== 3 || !node.nodeValue || !node.nodeValue.trim()) return;
+    var parent = node.parentNode;
+    if (!parent || SKIP[parent.tagName]) return;
+    var next = tr(node.nodeValue);
+    if (next !== node.nodeValue) node.nodeValue = next;
+  }
+
+  function translateAttr(el, name) {
+    if (!el || el.nodeType !== 1 || !el.hasAttribute(name)) return;
+    var v = el.getAttribute(name);
+    var next = tr(v);
+    if (next !== v) el.setAttribute(name, next);
+  }
+
+  function translateTree(root) {
+    if (lang !== 'en' || !root) return;
+    if (root.nodeType === 3) { translateTextNode(root); return; }
+    if (root.nodeType !== 1 && root.nodeType !== 9 && root.nodeType !== 11) return;
+    if (root.nodeType === 1) {
+      if (SKIP[root.tagName]) return;
+      ['title', 'placeholder', 'aria-label', 'alt'].forEach(function (a) { translateAttr(root, a); });
+    }
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, null);
+    var n = walker.currentNode;
+    while (n) {
+      if (n.nodeType === 1) {
+        if (SKIP[n.tagName]) { n = walker.nextSibling(); continue; }
+        ['title', 'placeholder', 'aria-label', 'alt'].forEach(function (a) { translateAttr(n, a); });
+      } else if (n.nodeType === 3) {
+        translateTextNode(n);
+      }
+      n = walker.nextNode();
+    }
+  }
+
+  var DATA_ROOTS = ['NODES', 'CPU_CORES', 'TIERS', 'GPU_ARCHS', 'MODEMS', 'MEMORIES', 'NPUS', 'ISPS', 'VDECS', 'ADSPS', 'HSIOS', 'XDIE_TYPES', 'XDIE_TOPOS', 'COOLINGS', 'SLC_SIZES', 'SEGMENTS', 'KINDS', 'RANKS'];
+  var DATA_FIELDS = ['name', 'note', 'desc', 'tip', 'label', 'title', 'remark', 'tag', 'gen', 'cpu', 'short'];
+  var ORIG = new WeakMap();
+
+  function localizeObj(o) {
+    if (!o || typeof o !== 'object') return;
+    if (!ORIG.has(o)) {
+      var snap = {};
+      DATA_FIELDS.forEach(function (f) { if (typeof o[f] === 'string') snap[f] = o[f]; });
+      ORIG.set(o, snap);
+    }
+    var snap2 = ORIG.get(o);
+    DATA_FIELDS.forEach(function (f) {
+      if (snap2[f] != null) o[f] = lang === 'en' ? tr(snap2[f]) : snap2[f];
+    });
+  }
+
+  function walkData(o, seen) {
+    if (!o || typeof o !== 'object') return;
+    seen = seen || new WeakSet();
+    if (seen.has(o)) return;
+    seen.add(o);
+    if (!Array.isArray(o)) localizeObj(o);
+    if (Array.isArray(o)) o.forEach(function (v) { walkData(v, seen); });
+    else Object.keys(o).forEach(function (k) {
+      if (k === '__zh' || k === 'color') return;
+      var v = o[k];
+      if (v && typeof v === 'object') walkData(v, seen);
+    });
+  }
+
+  function localizeKB() {
+    var KB = window.ARM && window.ARM.KB;
+    if (!KB) return;
+    DATA_ROOTS.forEach(function (k) { if (KB[k]) walkData(KB[k]); });
+  }
+
+  function applyStatic() {
+    var en = lang === 'en';
+    document.documentElement.lang = en ? 'en' : 'zh-CN';
+    document.documentElement.dataset.lang = lang;
+    document.title = en ? 'Revive the Glory of ARM · ARM Dynasty · v15.3' : '重振 ARM 荣光 · ARM Dynasty · v15.3';
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute('content', en
+      ? 'A custom-chip simulator: choose a die area, place CPU/GPU cores one by one, overclock, and benchmark.'
+      : '选 die 面积、逐个摆放 CPU/GPU 核心、超频跑分的芯片自制模拟器');
+    var brand = document.querySelector('.brand-txt b');
+    if (brand) brand.textContent = en ? 'Revive the Glory of ARM' : '重振 ARM 荣光';
+    var del = document.getElementById('delhint-txt');
+    if (del) del.textContent = en ? 'Drag off the die to delete this block' : '拖出裸片即删除该模块';
+    var stepsNav = document.getElementById('steps');
+    if (stepsNav) stepsNav.setAttribute('aria-label', en ? 'Steps' : '流程');
+    var hl = document.getElementById('home-lbl'); if (hl) hl.textContent = en ? 'Home' : '首页';
+    var ll = document.getElementById('lang-lbl'); if (ll) ll.textContent = en ? '中文' : 'EN';
+    var hb = document.getElementById('btn-home'); if (hb) hb.title = en ? 'Back to home' : '回到首页';
+    var lb = document.getElementById('btn-lang'); if (lb) lb.title = en ? 'Switch language' : '切换语言 / Switch language';
+    var tb = document.getElementById('btn-theme'); if (tb) tb.title = en ? 'Switch light / dark theme' : '切换浅色 / 暗灰主题';
+    var gb = document.getElementById('btn-glass'); if (gb) gb.title = en ? 'Toggle liquid-glass refraction' : '切换液态玻璃折射';
+    var help = document.getElementById('btn-help'); if (help) help.title = en ? 'How to play' : '怎么玩';
+    var boot = document.getElementById('boot');
+    if (boot && boot.dataset.done !== '1' && boot.querySelector('.boot-spin')) {
+      var tail = boot.lastChild;
+      if (tail && tail.nodeType === 3) tail.nodeValue = en ? ' Initializing…' : '正在初始化…';
+    }
+  }
+
+  var observer = null;
+  function startObserver() {
+    if (observer || lang !== 'en' || !document.body) return;
+    observer = new MutationObserver(function (muts) {
+      if (lang !== 'en') return;
+      for (var i = 0; i < muts.length; i++) {
+        var m = muts[i];
+        if (m.type === 'characterData') translateTextNode(m.target);
+        else if (m.type === 'attributes') translateAttr(m.target, m.attributeName);
+        else if (m.addedNodes && m.addedNodes.length) {
+          for (var j = 0; j < m.addedNodes.length; j++) translateTree(m.addedNodes[j]);
+        }
+      }
+    });
+    observer.observe(document.body, {
+      subtree: true, childList: true, characterData: true,
+      attributes: true, attributeFilter: ['title', 'placeholder', 'aria-label', 'alt']
+    });
+    translateTree(document.body);
+  }
+
+  window.ARM = window.ARM || {};
+  window.ARM.i18n = {
+    get lang() { return lang; },
+    isEN: function () { return lang === 'en'; },
+    set: function (l) {
+      lang = l === 'en' ? 'en' : 'zh';
+      try { localStorage.setItem('armdynasty.lang', lang); } catch (e) { }
+      if (observer) { observer.disconnect(); observer = null; }
+      applyStatic();
+      localizeKB();
+      if (lang === 'en') startObserver();
+      return lang;
+    },
+    tr: tr,
+    t: t,
+    norm: norm,
+    localizeKB: localizeKB,
+    applyStatic: applyStatic,
+    translateTree: translateTree,
+    translateTextNode: translateTextNode,
+    startObserver: startObserver
+  };
+
+  applyStatic();
+})();
+</script>
+
 <!-- ============ 液态玻璃 SVG 位移滤镜（知识库 §2.1） ============ -->
 <svg width="0" height="0" aria-hidden="true" focusable="false" class="lg-defs">
   <defs>
@@ -1270,6 +2679,12 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     </div>
   </div>
   <div class="top-actions">
+    <button id="btn-home" class="chip-btn glass-2" title="回到首页">
+      <span class="home-ic" aria-hidden="true">⌂</span><span class="lbl" id="home-lbl">首页</span>
+    </button>
+    <button id="btn-lang" class="chip-btn glass-2" title="切换语言 / Switch language">
+      <span class="dot"></span><span class="lbl" id="lang-lbl">EN</span>
+    </button>
     <button id="btn-theme" class="chip-btn glass-2" title="切换浅色 / 暗灰主题">
       <span class="th"></span><span class="lbl" id="theme-lbl">浅色</span>
     </button>
@@ -1715,6 +3130,8 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 (function () {
   'use strict';
   const KB = window.ARM.KB;
+  const I = window.ARM.i18n;
+  const T = (zh, en) => I.t(zh, en);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   /* 多核扩展按核心等级加权：超大核抢功耗/带宽，小核贡献有限 */
@@ -1805,7 +3222,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       bw += m.bw; cost += m.cost; names[m.name] = (names[m.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { bw, cost, count: us.length, label: label || '无内存控制器', name: label || '无' };
+    return { bw, cost, count: us.length, label: label || T('无内存控制器', 'No memory controller'), name: label || T('无', 'None') };
   }
   function npuAgg(st) {
     const us = placedOf(st, 'npu');
@@ -1815,13 +3232,13 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       tops += n.tops; cost += n.cost; names[n.name] = (names[n.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { tops, cost, count: us.length, label: label || '无', name: label || '无' };
+    return { tops, cost, count: us.length, label: label || T('无', 'None'), name: label || T('无', 'None') };
   }
   function slcAgg(st) {
     const us = placedOf(st, 'slc');
     let mb = 0;
     us.forEach(u => { mb += (u.mb || 0); });
-    return { mb, count: us.length, cost: mb * 1.6, label: mb ? mb + ' MB ×' + us.length : '无' };
+    return { mb, count: us.length, cost: mb * 1.6, label: mb ? mb + ' MB ×' + us.length : T('无', 'None') };
   }
 
   /** ISP / 视频解码 / 音频 DSP：都是可叠多块的，面积·功耗·成本直接相加 */
@@ -1834,7 +3251,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       names[s.name] = (names[s.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { cap, cost, pw, area, count: us.length, label: label || '无', name: label || '无' };
+    return { cap, cost, pw, area, count: us.length, label: label || T('无', 'None'), name: label || T('无', 'None') };
   }
   function vdecAgg(st) {
     const us = placedOf(st, 'vdec');
@@ -1845,7 +3262,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       names[s.name] = (names[s.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { cap, cost, pw, area, count: us.length, label: label || '无', name: label || '无' };
+    return { cap, cost, pw, area, count: us.length, label: label || T('无', 'None'), name: label || T('无', 'None') };
   }
   function adspAgg(st) {
     const us = placedOf(st, 'adsp');
@@ -1856,7 +3273,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       names[s.name] = (names[s.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { cap, cost, pw, area, count: us.length, label: label || '无', name: label || '无' };
+    return { cap, cost, pw, area, count: us.length, label: label || T('无', 'None'), name: label || T('无', 'None') };
   }
 
   /** 高速连接：带宽 / 成本 / 功耗全部按占用的格数算（长宽自由） */
@@ -1870,7 +3287,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       names[h.name] = (names[h.name] || 0) + 1;
     });
     const label = Object.keys(names).map(n => (names[n] > 1 ? names[n] + '×' : '') + n).join(' + ');
-    return { bw, cost, pw, cells, count: us.length, label: label || '无', name: label || '无' };
+    return { bw, cost, pw, cells, count: us.length, label: label || T('无', 'None'), name: label || T('无', 'None') };
   }
 
   /** CPU 核心的缓存局部性：离最近的 SLC 越近，延迟越低，跑分越高（最高 +12%） */
@@ -2170,18 +3587,18 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     let cells = 0;
     st.units.forEach(u => {
       if (u.x < 0 || u.y < 0) { unplaced.push(u); return; }
-      if (u.x + u.w > n || u.y + u.h > n) { problems.push({ uid: u.uid, why: '超出裸片边界' }); return; }
+      if (u.x + u.w > n || u.y + u.h > n) { problems.push({ uid: u.uid, why: T('超出裸片边界', 'outside the die boundary') }); return; }
       let overlap = false;
       for (let y = u.y; y < u.y + u.h; y++)
         for (let x = u.x; x < u.x + u.w; x++) if (g[y][x]) overlap = true;
-      if (overlap) { problems.push({ uid: u.uid, why: '与其他模块重叠' }); return; }
-      if (u.w * u.h < minCells(u, st)) { problems.push({ uid: u.uid, why: '面积小于物理下限' }); }
+      if (overlap) { problems.push({ uid: u.uid, why: T('与其他模块重叠', 'overlaps another block') }); return; }
+      if (u.w * u.h < minCells(u, st)) { problems.push({ uid: u.uid, why: T('面积小于物理下限', 'area below the physical minimum') }); }
       stamp(g, u, 1);
       cells += u.w * u.h;
     });
     st.units.forEach(u => { u.bad = problems.some(p => p.uid === u.uid); });
     const cpuN = st.units.filter(u => u.kind === 'cpu').length;
-    if (!cpuN) problems.push({ uid: '-', why: '还没有 CPU 核心' });
+    if (!cpuN) problems.push({ uid: '-', why: T('还没有 CPU 核心', 'no CPU cores yet') });
     // 注：未放置的模块不再阻止流片 —— 它们只是不参与计算
     return { problems, unplaced, cells, util: cells / (n * n), ok: !problems.length };
   }
@@ -2196,15 +3613,15 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       const v = validate(ds);
       d.units = ds.units;
       v.problems.forEach(p => {
-        if (p.why === '还没有 CPU 核心') return;        // 整包有一颗就够
-        problems.push({ uid: p.uid, why: 'Die ' + (i + 1) + '：' + p.why, die: i });
+        if (p.why === '还没有 CPU 核心' || p.why === 'no CPU cores yet') return;   // 整包有一颗就够
+        problems.push({ uid: p.uid, why: I.isEN() ? ('Die ' + (i + 1) + ': ' + p.why) : ('Die ' + (i + 1) + '：' + p.why), die: i });
       });
       v.unplaced.forEach(u => unplaced.push(Object.assign({}, u, { die: i })));
       cpuTotal += (d.units || []).filter(u => u.kind === 'cpu').length;
       cells += v.cells;
       area += (d.n || st.n) * (d.n || st.n);
     });
-    if (!cpuTotal) problems.push({ uid: '-', why: '所有 die 都还没有 CPU 核心' });
+    if (!cpuTotal) problems.push({ uid: '-', why: T('所有 die 都还没有 CPU 核心', 'no CPU cores on any die') });
     return { problems, unplaced, cells, util: area ? cells / area : 0, ok: problems.length === 0 };
   }
 
@@ -2296,20 +3713,20 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
   function canMerge(st, uids) {
     const list = st.units.filter(u => uids.indexOf(u.uid) >= 0);
-    if (list.length < 2) return { ok: false, why: '至少选 2 块 GPU' };
-    if (list.some(u => u.kind !== 'gpu')) return { ok: false, why: '目前只支持合并 GPU 区域' };
+    if (list.length < 2) return { ok: false, why: T('至少选 2 块 GPU', 'Select at least 2 GPU blocks') };
+    if (list.some(u => u.kind !== 'gpu')) return { ok: false, why: T('目前只支持合并 GPU 区域', 'Only GPU regions can be merged right now') };
     const arch = list[0].archId;
-    if (list.some(u => u.archId !== arch)) return { ok: false, why: '只能合并同一架构的 GPU' };
-    if (list.some(u => u.x < 0)) return { ok: false, why: '有核心还没放置' };
+    if (list.some(u => u.archId !== arch)) return { ok: false, why: T('只能合并同一架构的 GPU', 'Only GPUs of the same architecture can merge') };
+    if (list.some(u => u.x < 0)) return { ok: false, why: T('有核心还没放置', 'Some cores are still unplaced') };
     const f = list[0].freq || 0;
-    if (list.some(u => Math.abs((u.freq || 0) - f) > 1e-6)) return { ok: false, why: '频率必须一致' };
-    if (!isConnected(list)) return { ok: false, why: '选中的块彼此不相连 —— 至少要边对边贴上' };
+    if (list.some(u => Math.abs((u.freq || 0) - f) > 1e-6)) return { ok: false, why: T('频率必须一致', 'Frequencies must match') };
+    if (!isConnected(list)) return { ok: false, why: T('选中的块彼此不相连 —— 至少要边对边贴上', 'Selected blocks are not connected — they must touch edge-to-edge') };
     const bb = bbox(list);
     const cells = list.reduce((a, u) => a + u.w * u.h, 0);
     const gap = bb.w * bb.h - cells;              // 补空缺要自己吃面积
     const others = st.units.filter(u => uids.indexOf(u.uid) < 0 && u.x >= 0);
     const clash = others.find(u => u.x < bb.x + bb.w && u.x + u.w > bb.x && u.y < bb.y + bb.h && u.y + u.h > bb.y);
-    if (clash) return { ok: false, why: '合并出的矩形会压到其他模块，先把它们挪开', bb, list, gap };
+    if (clash) return { ok: false, why: T('合并出的矩形会压到其他模块，先把它们挪开', 'The merged rectangle would overlap other blocks — move them first'), bb, list, gap };
     return { ok: true, list, bb, gap, cells, count: list.reduce((a, u) => a + (u.count || 1), 0) };
   }
 
@@ -2748,15 +4165,72 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
   /* ============ 温度标签 ============ */
   function tempTag(T) {
-    if (T < 62) return { t: '冰龙', c: '#0ea5a0', d: '摸起来是凉的，可以贴脸' };
-    if (T < 76) return { t: '温润', c: '#3b82f6', d: '温热，还能握得住' };
-    if (T < 88) return { t: '小火龙', c: '#b4732a', d: '烫手，建议戴壳' };
-    if (T < 98) return { t: '火龙', c: '#b3423f', d: '能煎蛋了，注意手感' };
-    return { t: '烧烤架', c: '#b3423f', d: '这已经不是手机了，是暖手宝' };
+    var en = I.isEN();
+    if (T < 62) return { t: en ? 'Ice Dragon' : '冰龙', c: '#0ea5a0', d: en ? 'Cool to the touch — you can rest your cheek on it' : '摸起来是凉的，可以贴脸' };
+    if (T < 76) return { t: en ? 'Warm' : '温润', c: '#3b82f6', d: en ? 'Warm, still holdable' : '温热，还能握得住' };
+    if (T < 88) return { t: en ? 'Little Fire Dragon' : '小火龙', c: '#b4732a', d: en ? 'Hot — use a case' : '烫手，建议戴壳' };
+    if (T < 98) return { t: en ? 'Fire Dragon' : '火龙', c: '#b3423f', d: en ? 'You could fry an egg — mind your fingers' : '能煎蛋了，注意手感' };
+    return { t: en ? 'Grill' : '烧烤架', c: '#b3423f', d: en ? 'This is no longer a phone; it is a hand warmer' : '这已经不是手机了，是暖手宝' };
   }
 
   /* ============ 点评 ============ */
+  function remarksEN(st, an, res, q) {
+    const out = [];
+    const allU = allUnitsOf(st);
+    const big = allU.filter(u => u.kind === 'cpu' && u.x >= 0).length;
+    const gpuN = an.gpu.cores;
+    if (an.dieCount > 1) {
+      out.push('Multi-die assembly: ' + an.dieCount + ' dies, interconnect quality Q=' + (an.xdie.Q * 100).toFixed(0) +
+        '%, multi-core cross-die efficiency ' + (an.xdie.xdieCpu * 100).toFixed(0) + '%, GPU cross-die efficiency ' +
+        (an.xdie.xdieGpu * 100).toFixed(0) + '%.');
+      if (an.xdie.Q < 0.5) out.push('Interconnect quality is low — an organic substrate with linear topology makes far dies drag each other down. Try a silicon bridge / interposer or ring / all-to-all topology.');
+      if (an.xdie.Q > 0.85) out.push('Excellent interconnect quality — cross-die bandwidth and latency are under control, nearly matching a monolithic die.');
+    }
+    if (an.unplaced.length) out.push('There are still ' + an.unplaced.length + ' unplaced blocks; they do not contribute to the score.');
+    if (an.problems.length) out.push('The floorplan has ' + an.problems.length + ' problems (overlap / out-of-bounds / insufficient area) — tape-out will fail.');
+    if (an.util < 0.55) out.push('The die is only ' + Math.round(an.util * 100) + '% utilized — area and yield are being wasted.');
+    if (an.util > 0.94) out.push('Utilization ' + Math.round(an.util * 100) + '% — routing pressure is severe.');
+    if (!an.mem.count) out.push('⚠️ No memory controller at all — bandwidth is zero and both multi-core and GPU are starved.');
+    else if (an.mem.count === 1) out.push('Only one memory controller (' + an.mem.bw.toFixed(1) + 'GB/s) — add another to raise bandwidth again.');
+    else out.push(an.mem.count + ' memory controllers deliver ' + an.mem.bw.toFixed(1) + 'GB/s — but the bus starts to strain.');
+    if (!an.slc.mb) out.push('⚠️ No SLC system cache — CPU memory access travels far, slowly and inefficiently.');
+    else if (an.cpu.locAvg < 1.05 && an.cpu.cores > 1) out.push('SLC is too far from the CPU (average locality only +' + ((an.cpu.locAvg - 1) * 100).toFixed(1) + '%) — cluster big cores next to the cache.');
+    else if (an.cpu.locAvg >= 1.09) out.push('CPU cores hug the SLC — cache locality +' + ((an.cpu.locAvg - 1) * 100).toFixed(1) + '%, a flagship-grade floorplan.');
+    if (!an.npu.tops) out.push('No NPU — on-device AI is brute-forced by the CPU.');
+    if (!an.isp.count) out.push('No ISP — the camera must be software-processed; photos and video are basically ruined.');
+    else if (an.isp.cap < 2) out.push('ISP has only ' + an.isp.cap + ' GPix/s — fine for one camera, but multiple cameras queue up.');
+    else out.push('ISP stacked to ' + an.isp.cap.toFixed(1) + ' GPix/s — multi-camera and 8K recording are covered.');
+    if (!an.vdec.count) out.push('No video decoder — even 4K playback needs software decoding, and battery life suffers.');
+    if (!an.adsp.count) out.push('No audio DSP — voice wake and audio decoding run on the CPU (a common standby-drain cause).');
+    if (an.hsio.count && an.hsio.bw < 100) out.push('High-speed I/O is only ' + an.hsio.bw.toFixed(0) + 'GB/s — stretch it so multi-core and GPU can be fed properly.');
+    else if (an.hsio.bw >= 400) out.push('High-speed I/O stacked to ' + an.hsio.bw.toFixed(0) + 'GB/s — core and GPU data paths are fully fed.');
+    if (!st.noc) out.push('NoC interconnect was skipped — multi-core and GPU data paths suffer.');
+    if (big === 1) out.push('Only one CPU core? This is the single-core leaderboard (not).');
+    if (big > 10) out.push(big + ' CPU cores! Multi-core will look great, but sustained power needs serious cooling.');
+    if (an.cpu.cores >= 16) {
+      const effPct = (Number(an.cpu.eff) || 0) * 100;
+      const slcPerCore = Number(an.cpu.slcPerCore) || 0;
+      const locAvg = Number(an.cpu.locAvg) || 1;
+      out.push('Multi-core scaling: ' + an.cpu.cores + ' cores → ' + an.seg.name + ' efficiency ' + effPct.toFixed(0) +
+        '%, SLC ' + slcPerCore.toFixed(1) + ' MB/core, average locality +' + ((locAvg - 1) * 100).toFixed(1) + '%.');
+    }
+    if (an.cpu.extraCells > 0) out.push('SLC locality is equivalent to ' + an.cpu.extraCells + ' extra cache cells — single-core performance got a small boost.');
+    if (gpuN > 20) out.push('GPU stacked to MP' + gpuN + ' — area and power are about to take off.');
+    if (an.modem.id === 'm_none') out.push('No modem — fine for desktop/server, unthinkable for phones.');
+    else if (an.modem.id === 'm4g') out.push('4G only... the launch stream will be flooded with complaints.');
+    if (an.modem.sat) out.push('Satellite communication supported — post from Everest.');
+    if (an.cooling && an.cooling.id === 'ln2') out.push('Extreme LN2: θ=0.02 K/W keeps the chip near room temperature, so sustained performance nearly equals peak; in reality it frosts and condenses — do not try this at home.');
+    if (an.yieldRate < 0.6) out.push('Package yield is only ' + (an.yieldRate * 100).toFixed(0) + '%, ' + (an.dieCount > 1 ? 'multi-die yield multiplies per die, ' : '') + 'the die is too large or the node too new — costs exploded.');
+    if (q && q.cpu > 1.15) out.push('This silicon’s CPU quality is ' + (q.cpu * 100).toFixed(0) + '% — plenty of overclocking headroom (lucky).');
+    if (q && q.cpu < 1.03) out.push('CPU quality is only ' + (q.cpu * 100).toFixed(0) + '% — overclocking crashes instantly (unlucky).');
+    if (res && !res.crashed && res.peakT > 90) out.push('Peak temperature ' + res.peakT.toFixed(0) + '°C — already hugging the thermal limit during the run.');
+    if (res && !res.crashed && res.throttle < 0.7) out.push('Sustained performance is only ' + (res.throttle * 100).toFixed(0) + '% of peak — the classic “benchmark hero, gaming zero”.');
+    if (res && !res.crashed && res.throttle > 0.92 && res.peakT < 85) out.push('Peak and sustained are nearly identical — excellent cooling tuning, worth a big slide.');
+    return out;
+  }
+
   function remarks(st, an, res, q) {
+    if (I.isEN()) return remarksEN(st, an, res, q);
     const out = [];
     const allU = allUnitsOf(st);
     const big = allU.filter(u => u.kind === 'cpu' && u.x >= 0).length;
@@ -2839,8 +4313,16 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
   'use strict';
   const KB = window.ARM.KB;
   const E = window.ARM.Engine;
+  const I = window.ARM.i18n;
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+  const T = (zh, en) => I.t(zh, en);
+  const X = s => I.tr(s);
+
+  /* 用户可见的品牌 / 名称：默认值跟随语言，用户自定义内容原样保留 */
+  const brandText = () => I.tr(st.brand);
+  const chipNameText = () => (I.isEN() && st.chipName === '荣光 X1') ? 'Glory X1' : st.chipName;
+  const sloganText = () => (I.isEN() && st.slogan === '重振 ARM 荣光') ? 'Revive the Glory of ARM' : st.slogan;
 
   /* ---------------- 小工具 ---------------- */
   const clamp = E.clamp;
@@ -2930,11 +4412,11 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     if (u.kind === 'mem') { const m = KB.mem(u.memId); return m ? m.bw + 'GB/s' : ''; }
     if (u.kind === 'npu') { const n = KB.npu(u.npuId); return n ? n.tops + ' TOPS' : ''; }
     if (u.kind === 'isp') { const s = KB.isp(u.ispId); return s ? s.cap + ' GPix/s' : ''; }
-    if (u.kind === 'vdec') { const s = KB.vdec(u.vdecId); return s ? s.cap + ' 路' : ''; }
+    if (u.kind === 'vdec') { const s = KB.vdec(u.vdecId); return s ? s.cap + T(' 路', ' streams') : ''; }
     if (u.kind === 'adsp') { const s = KB.adsp(u.adspId); return s ? s.cap + ' GOPS' : ''; }
     if (u.kind === 'hsio') { const h = KB.hsio(u.hsioId); return h ? (h.per * u.w * u.h) + 'GB/s' : ''; }
     if (u.kind === 'slc') return (u.mb || 0) + ' MB';
-    return (u.w * u.h) + '格';
+    return (u.w * u.h) + T('格', ' cells');
   }
   /* CPU 到最近 SLC 的距离 → 局部性加成 */
   function locTag(u) {
@@ -3273,12 +4755,48 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
   }
 
   let toastT = null;
+  let benchToken = 0;
   function toast(msg, ms) {
-    const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    const t = $('#toast');
+    t.textContent = I.tr(msg);
+    t.classList.add('on');
     clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms || 2400);
   }
-  function popup(html) { const w = $('#modal'); w.innerHTML = `<div class="modal glass">${html}</div>`; w.hidden = false; }
+  function popup(html) {
+    const w = $('#modal');
+    w.innerHTML = `<div class="modal glass">${html}</div>`;
+    w.hidden = false;
+    I.translateTree(w);
+  }
   function closePopup() { const w = $('#modal'); w.hidden = true; w.innerHTML = ''; }
+
+  function goHome() {
+    benchToken++;
+    closePopup();
+    shareCanvas = null; shareName = '';
+    st.screen = 'home';
+    st.overview = false;
+    st.selected = null; st.pending = null; st.pendingXY = null; st.multi = []; st.selRect = null;
+    hidePreview(); setDelHint(false);
+    save(); render();
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+  }
+
+  function setLang(l) {
+    if (I.set(l) === I.lang && I.lang !== l) return;
+    benchToken++;
+    closePopup(); shareCanvas = null; shareName = '';
+    if (st.screen === 'bench') st.screen = 'oc';
+    I.localizeKB();
+    /* 成绩结果里缓存了部分展示文案；切换语言时按同一颗硅、同一套参数重算，
+       保证结果页与海报不会中英混排。 */
+    if (st.result) st.result = E.simulate(st, st.oc, st.quality, { rng: seedRng(benchSeed()) });
+    I.applyStatic();
+    applyTheme();
+    applyGlass();
+    save(); render();
+    toast(I.isEN() ? 'Language switched to English' : '已切换为中文');
+  }
 
   /* ============================================================
      顶栏
@@ -3424,11 +4942,11 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <div class="glass card">
         <h3 style="margin-bottom:12px">品牌与命名</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:640px">
-          <div class="field"><label>芯片名</label><input type="text" id="f-name" value="${esc(st.chipName)}" maxlength="18"/></div>
+          <div class="field"><label>芯片名</label><input type="text" id="f-name" value="${esc(chipNameText())}" maxlength="18"/></div>
           <div class="field"><label>品牌 / 平台</label>
-            <select id="f-brand">${['ARM 公版架构', 'Arm CSS 定制', '自研微架构', '堆料狂魔工作室', '性价比守门员'].map(b => `<option ${st.brand === b ? 'selected' : ''}>${b}</option>`).join('')}</select>
+            <select id="f-brand">${['ARM 公版架构', 'Arm CSS 定制', '自研微架构', '堆料狂魔工作室', '性价比守门员'].map(b => `<option value="${b}" ${st.brand === b ? 'selected' : ''}>${esc(I.tr(b))}</option>`).join('')}</select>
           </div>
-          <div class="field" style="grid-column:1/-1"><label>发布会 Slogan</label><input type="text" id="f-slogan" value="${esc(st.slogan)}" maxlength="40"/></div>
+          <div class="field" style="grid-column:1/-1"><label>发布会 Slogan</label><input type="text" id="f-slogan" value="${esc(sloganText())}" maxlength="40"/></div>
         </div>
       </div>
     </div>`;
@@ -3498,7 +5016,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <div><h2>② 摆版图 · 总览图<span class="badge" style="margin-left:10px">${dieCount()} die</span></h2>
         <p>点击任意一块 die 进入编辑。连线代表互连拓扑；在下方逐条改连接方式，跨 die 效率会实时变化。</p></div>
       <div class="wrap">
-        <button class="btn btn-sm" data-act="share-layout" title="分享当前 die 的版图">分享当前 die</button>
+        <button class="btn btn-sm" data-act="share-layout-all" title="分享全部 die 的拼接总览">分享总览</button>
         <button class="btn btn-sm" data-act="auto-place-all">全部自动布局</button>
         <button class="btn btn-primary" data-act="to-pack">去流片 →</button>
       </div>
@@ -4110,9 +5628,9 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <div class="glass card">
         <div class="pack-scene">
           <div class="package">
-            <div class="pack-brand">${esc(st.brand)}</div>
+            <div class="pack-brand">${esc(brandText())}</div>
             <div class="pack-die">${chipletHTML}</div>
-            <div class="pack-label">${esc(st.chipName).toUpperCase()}</div>
+            <div class="pack-label">${esc(chipNameText()).toUpperCase()}</div>
           </div>
         </div>
         <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">
@@ -4126,11 +5644,11 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <div class="stack">
         <div class="glass card">
           <h3 style="margin-bottom:12px">规格书 Spec Sheet</h3>
-          <div class="field" style="margin-bottom:12px"><label>芯片名</label><input type="text" id="f-name2" value="${esc(st.chipName)}" maxlength="18"/></div>
+          <div class="field" style="margin-bottom:12px"><label>芯片名</label><input type="text" id="f-name2" value="${esc(chipNameText())}" maxlength="18"/></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
             <div class="spec-lite"><small>Die / 互连</small><b>${an.dieCount > 1 ? an.dieCount + ' die · ' + an.xdie.topoDef.name : '单片'}</b><div class="tiny muted">${an.dieCount > 1 ? (an.xdie.links.map(l => l.short).join(' / ') || '—') + ' · Q ' + (an.xdie.Q * 100).toFixed(0) + '%' : '单 die'} · 单 die 良率 ${(an.dieYield * 100).toFixed(1)}%</div></div>
             <div class="spec-lite"><small>CPU</small><b>${an.cpu.cores} 核</b><div class="tiny muted">${esc(cpuDesc)}</div></div>
-            <div class="spec-lite"><small>GPU</small><b>${gpuAllAdreno ? an.gpu.cores + ' 颗' : 'MP' + an.gpu.cores}</b><div class="tiny muted">${esc(gpuDesc)}</div></div>
+            <div class="spec-lite"><small>GPU</small><b>${gpuAllAdreno ? an.gpu.cores + T(' 颗', ' GPUs') : 'MP' + an.gpu.cores}</b><div class="tiny muted">${esc(gpuDesc)}</div></div>
             <div class="spec-lite"><small>基带</small><b>${esc(KB.modem(st.modem).name)}</b><div class="tiny muted">${KB.modem(st.modem).dl ? '下行 ' + KB.modem(st.modem).dl + ' Gbps' : '纯计算芯片'}${KB.modem(st.modem).sat ? ' · 卫星' : ''}</div></div>
             <div class="spec-lite"><small>内存</small><b>${an.mem.count} 块</b><div class="tiny muted">${esc(an.mem.label)} · ${an.mem.bw.toFixed(1)} GB/s</div></div>
             <div class="spec-lite"><small>NPU</small><b>${an.npu.tops} TOPS</b><div class="tiny muted">${esc(an.npu.label)}</div></div>
@@ -4362,25 +5880,28 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     st.pending = null;
     st.result = E.simulate(st, st.oc, st.quality, { rng: seedRng(benchSeed()) });
     st.screen = 'bench';
+    const token = ++benchToken;
     render();
     if (st.result.crashed) {
-      setTimeout(() => document.body.classList.add('crash-flash'), 900);
+      setTimeout(() => { if (token === benchToken) document.body.classList.add('crash-flash'); }, 900);
       setTimeout(() => {
+        if (token !== benchToken) return;
         document.body.classList.remove('crash-flash');
         st.screen = 'result'; st.runs++; save(); render();
       }, 2600);
       return;
     }
-    animateBench();
+    animateBench(token);
   }
 
-  function animateBench() {
+  function animateBench(token) {
     const sim = st.result, series = sim.series;
     const ring = $('#ring'), pct = $('#pct'), sub = $('#pct-sub'), cv = $('#chart');
     const total = TESTS.length;
     let t0 = performance.now();
     const STEP = 760, DUR = total * STEP;
     function frame(now) {
+      if (token !== benchToken) return;
       const p = clamp((now - t0) / DUR, 0, 1);
       if (ring) ring.setAttribute('stroke-dashoffset', String(327 * (1 - p)));
       if (pct) pct.textContent = Math.round(p * 100);
@@ -4390,14 +5911,14 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
         row.classList.toggle('run', i === idx);
         if (i < idx) row.querySelector('.tv').textContent = TESTS[i].pick(sim.sust);
       });
-      if (sub) sub.textContent = (p < 1 && TESTS[idx]) ? TESTS[idx].name.toUpperCase() : 'FINISHED';
+      if (sub) sub.textContent = (p < 1 && TESTS[idx]) ? I.tr(TESTS[idx].name).toUpperCase() : 'FINISHED';
       drawChart(cv, series, Math.max(2, Math.round(p * series.length)));
       if (p < 1) requestAnimationFrame(frame);
       else {
         const row = $$('.test-row')[total - 1];
         row.classList.remove('run'); row.classList.add('done');
         row.querySelector('.tv').textContent = TESTS[total - 1].pick(sim.sust);
-        setTimeout(() => { st.screen = 'result'; st.runs++; save(); render(); }, 780);
+        setTimeout(() => { if (token !== benchToken) return; st.screen = 'result'; st.runs++; save(); render(); }, 780);
       }
     }
     requestAnimationFrame(frame);
@@ -4430,7 +5951,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     g.beginPath(); g.moveTo(pad.l, YT(wall)); g.lineTo(pad.l + iw, YT(wall)); g.stroke();
     g.setLineDash([]);
     g.fillStyle = 'rgba(179,66,63,.8)'; g.font = '9px system-ui';
-    g.fillText(wall + '°C 温度墙', pad.l + 3, YT(wall) - 3);
+    g.fillText(wall + T('°C 温度墙', '°C thermal limit'), pad.l + 3, YT(wall) - 3);
 
     g.fillStyle = 'rgba(14,165,160,.22)';
     data.forEach((d, i) => g.fillRect(X(i), h - pad.b + 4, Math.max(1, iw / series.length), 7 * d.thr));
@@ -4652,7 +6173,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       } else if (u.kind === 'isp') {
         const x = KB.isp(u.ispId); if (x) add('isp:' + u.ispId, x.name, KIND_COLOR.isp, 1, x.cap + ' GPix/s');
       } else if (u.kind === 'vdec') {
-        const x = KB.vdec(u.vdecId); if (x) add('vdec:' + u.vdecId, x.name, KIND_COLOR.vdec, 1, '解码力 ' + x.cap);
+        const x = KB.vdec(u.vdecId); if (x) add('vdec:' + u.vdecId, x.name, KIND_COLOR.vdec, 1, T('解码力 ', 'Decode ') + x.cap);
       } else if (u.kind === 'adsp') {
         const x = KB.adsp(u.adspId); if (x) add('adsp:' + u.adspId, x.name, KIND_COLOR.adsp, 1, x.cap + ' GOPS');
       } else if (u.kind === 'hsio') {
@@ -4660,7 +6181,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       } else if (u.kind === 'modem') {
         const m = KB.modem(st.modem); if (m) add('modem', m.name, KIND_COLOR.modem, 1, m.dl ? '↓' + m.dl + ' Gbps' : '');
       } else if (u.kind === 'noc') {
-        add('noc', 'NoC 互连总线', KIND_COLOR.noc, 1, '');
+        add('noc', I.tr('NoC 互连总线'), KIND_COLOR.noc, 1, '');
       }
     });
     return Array.from(map.values());
@@ -4721,11 +6242,11 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     ctx.font = shareFont(600, Math.max(13, size * 0.026));
     ctx.fillStyle = 'rgba(255,255,255,.55)';
     ctx.textAlign = 'left';
-    ctx.fillText(st.chipName.toUpperCase(), x + size * 0.07, y + size * 0.94);
+    ctx.fillText(chipNameText().toUpperCase(), x + size * 0.07, y + size * 0.94);
     ctx.textAlign = 'right';
     ctx.font = shareFont(600, Math.max(10, size * 0.018));
     ctx.fillStyle = 'rgba(255,255,255,.35)';
-    ctx.fillText(st.brand.toUpperCase(), x + size * 0.93, y + size * 0.075);
+    ctx.fillText(brandText().toUpperCase(), x + size * 0.93, y + size * 0.075);
     ctx.textAlign = 'left';
   }
 
@@ -4763,19 +6284,64 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     }
   }
 
-  /** 版图海报：放大版图 + 模块名称与数量 */
-  function buildLayoutShare() {
-    const units = st.units.filter(u => u && u.x >= 0);
+  /** 分享版图：多 die 时让用户选择当前 die 或完整拼接总览 */
+  function chooseShareLayout() {
+    if (dieCount() <= 1) { buildLayoutShare('current'); return; }
+    popup(`
+      <div class="between">
+        <div><h2>${T('分享版图', 'Share Floorplan')}</h2>
+          <p class="tiny muted" style="margin-top:4px;max-width:54ch">${T('当前设计有 ' + dieCount() + ' 块 die。选择只分享正在编辑的一块，或分享完整拼接总览。',
+            'This design has ' + dieCount() + ' dies. Share the die you are editing, or the full package overview.')}</p></div>
+        <button class="btn btn-icon" data-act="close-share-choice" title="${T('关闭', 'Close')}">✕</button>
+      </div>
+      <div class="pick-list" style="margin-top:16px">
+        <button class="pick" data-act="share-layout-current">
+          <span class="pal-chip" style="background:#ffab2e"></span>
+          <div><b>${T('只分享当前 Die', 'Share Current Die Only')}</b>
+            <small>${T('Die ' + (st.activeDie + 1) + ' / ' + dieCount() + ' · 放大版图，模块名称可读',
+              'Die ' + (st.activeDie + 1) + ' / ' + dieCount() + ' · enlarged floorplan with readable labels')}</small></div>
+        </button>
+        <button class="pick" data-act="share-layout-all">
+          <span class="pal-chip" style="background:linear-gradient(135deg,#ff6fb0,#5cc8ff,#c46bff)"></span>
+          <div><b>${T('分享整个大 Die 总览', 'Share Full Package Overview')}</b>
+            <small>${T(dieCount() + ' 块 die 拼接 · 互连拓扑 · 汇总模块清单',
+              dieCount() + ' dies · interconnect topology · combined block list')}</small></div>
+        </button>
+      </div>
+      <div class="tiny muted" style="margin-top:12px">${T('总览模式会把所有 die 一起画出来，版图模块会缩小，名称以底部清单为准。',
+        'Overview mode draws every die together; blocks are smaller and the combined list below carries the names.')}</div>
+    `);
+  }
+
+  /** 版图海报：current = 当前 die；all = 完整多 die 拼接总览 */
+  function buildLayoutShare(mode) {
+    mode = mode === 'all' ? 'all' : 'current';
+    const allMode = mode === 'all' && dieCount() > 1;
+    const units = allMode
+      ? E.allUnitsOf(st).filter(u => u && u.x >= 0)
+      : st.units.filter(u => u && u.x >= 0);
     if (!units.length) { toast('裸片上还没有模块，先摆点东西再分享'); return; }
+
     const n = st.n;
-    const cell = n <= 12 ? 90 : n <= 16 ? 82 : n <= 20 ? 74 : 68;
+    const k = dieCount();
+    const an = E.analyze(st);
+    const v = allMode ? E.validateAll(st) : E.validate(st);
+
+    const cell = allMode
+      ? (n <= 12 ? 50 : n <= 16 ? 44 : n <= 20 ? 40 : 36)
+      : (n <= 12 ? 90 : n <= 16 ? 82 : n <= 20 ? 74 : 68);
     const dieSize = cell * n;
+    const cols = allMode ? (k <= 1 ? 1 : 2) : 1;
+    const rows = allMode ? Math.ceil(k / cols) : 1;
+    const gap = allMode ? Math.max(18, Math.round(dieSize * 0.035)) : 0;
+    const gridW = cols * dieSize + (cols - 1) * gap;
+    const gridH = rows * dieSize + (rows - 1) * gap;
     const legend = shareLegend(units);
-    const cols = legend.length > 10 ? 2 : 1;
-    const rows = Math.ceil(legend.length / cols);
+    const lcols = legend.length > 10 ? 2 : 1;
+    const lrows = Math.ceil(legend.length / lcols);
     const M = 64;
-    const W = Math.max(1080, dieSize + M * 2);
-    const H = 236 + dieSize + 58 + 64 + rows * 42 + 104;
+    const W = Math.max(1080, (allMode ? gridW : dieSize) + M * 2);
+    const H = 236 + (allMode ? gridH : dieSize) + 58 + 64 + lrows * 42 + 104;
 
     const cv = document.createElement('canvas');
     cv.width = W; cv.height = H;
@@ -4787,47 +6353,109 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     /* 标题 */
     let nameSize = 48;
     ctx.font = shareFont(700, nameSize);
-    while (nameSize > 28 && ctx.measureText(st.chipName).width > W - M * 2 - 40) {
+    while (nameSize > 28 && ctx.measureText(chipNameText()).width > W - M * 2 - 40) {
       nameSize -= 2; ctx.font = shareFont(700, nameSize);
     }
     ctx.textAlign = 'left';
     ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(600, 15);
-    ctx.fillText('ARM DYNASTY · FLOORPLAN SHARE', M, 56);
+    ctx.fillText(allMode ? 'ARM DYNASTY · PACKAGE OVERVIEW' : 'ARM DYNASTY · FLOORPLAN SHARE', M, 56);
     ctx.fillStyle = '#18181b'; ctx.font = shareFont(700, nameSize);
-    ctx.fillText(st.chipName, M, 112);
+    ctx.fillText(chipNameText(), M, 112);
     ctx.fillStyle = '#52525b'; ctx.font = shareFont(400, 19);
-    ctx.fillText('“' + st.slogan + '”', M, 148);
+    ctx.fillText('"' + sloganText() + '"', M, 148);
 
-    const an = E.analyze(st);
-    const v = E.validate(st);
-    const pills = [
-      seg().name, KB.node(st.node).short,
-      n + '×' + n + ' · ' + st.mm2 + 'mm²',
-      '利用率 ' + (v.util * 100).toFixed(0) + '%'
-    ];
-    if (dieCount() > 1) pills.push('Die ' + (st.activeDie + 1) + '/' + dieCount());
-    pills.push('GB6 ' + fmt(an.score.single) + ' / ' + fmt(an.score.multi));
+    const pills = allMode
+      ? [seg().name, KB.node(st.node).short,
+         k + ' die · ' + an.areaTotal + 'mm²',
+         X('利用率 ') + (an.util * 100).toFixed(0) + '%',
+         an.xdie.topoDef.name + ' · Q ' + (an.xdie.Q * 100).toFixed(0) + '%',
+         'GB6 ' + fmt(an.score.single) + ' / ' + fmt(an.score.multi)]
+      : [seg().name, KB.node(st.node).short,
+         n + '×' + n + ' · ' + st.mm2 + 'mm²',
+         X('利用率 ') + (v.util * 100).toFixed(0) + '%',
+         'Die ' + (st.activeDie + 1) + '/' + k,
+         'GB6 ' + fmt(an.score.single) + ' / ' + fmt(an.score.multi)];
     sharePills(ctx, pills, M, 172, W - M * 2);
 
-    /* 版图 */
-    const dx = (W - dieSize) / 2, dy = 236;
-    drawShareDie(ctx, dx, dy, dieSize, units, n, { radius: 14 });
+    const dy = 236;
+    if (allMode) {
+      /* 多 die 总览：先画互连，再盖裸片，连线只在 die 间隙露出来 */
+      const spots = k === 2 ? [[0, 0], [1, 0]]
+        : k === 3 ? [[0, 0], [1, 0], [0.5, 1]]
+        : [[0, 0], [1, 0], [0, 1], [1, 1]];
+      const dx = (W - gridW) / 2;
+      const pos = i => ({
+        x: dx + spots[i][0] * (dieSize + gap),
+        y: dy + spots[i][1] * (dieSize + gap)
+      });
+      const xi = E.xdieInfo(st);
+      ctx.save();
+      xi.links.forEach(l => {
+        const ab = l.key.split('-').map(Number);
+        if (!spots[ab[0]] || !spots[ab[1]]) return;
+        const a = pos(ab[0]), b = pos(ab[1]);
+        const ax = a.x + dieSize / 2, ay = a.y + dieSize / 2;
+        const bx = b.x + dieSize / 2, by = b.y + dieSize / 2;
+        ctx.strokeStyle = l.color;
+        ctx.globalAlpha = .72;
+        ctx.lineWidth = 3 + l.q * 3;
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+        /* 连接方式小标签，放在间隙中点 */
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        ctx.font = shareFont(700, 10);
+        const tw = ctx.measureText(l.short).width + 14;
+        ctx.globalAlpha = .95;
+        ctx.fillStyle = 'rgba(24,24,27,.9)';
+        shareRound(ctx, mx - tw / 2, my - 9, tw, 18, 9); ctx.fill();
+        ctx.strokeStyle = l.color; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+        ctx.fillText(l.short, mx, my + 3.5);
+        ctx.textAlign = 'left';
+      });
+      ctx.restore();
 
-    ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(500, 13);
-    ctx.textAlign = 'right';
-    ctx.fillText('每格 1mm² · ' + n + '×' + n + ' 网格', W - M, dy - 12);
-    ctx.textAlign = 'left';
+      spots.forEach((sp, i) => {
+        const tp = pos(i);
+        const d = st.dies[i] || { units: [] };
+        const du = (d.units || []).filter(u => u && u.x >= 0);
+        drawShareDie(ctx, tp.x, tp.y, dieSize, du, n, { labels: false, radius: 10, io: true });
+        const util = du.length ? Math.round(du.reduce((a, u) => a + u.w * u.h, 0) / (n * n) * 100) : 0;
+        ctx.font = shareFont(700, 11);
+        const tag = 'D' + (i + 1);
+        const tw = ctx.measureText(tag).width + 16;
+        ctx.fillStyle = 'rgba(24,24,27,.72)';
+        shareRound(ctx, tp.x + 8, tp.y + 8, tw, 22, 6); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillText(tag, tp.x + 16, tp.y + 23);
+        ctx.font = shareFont(600, 10);
+        ctx.fillStyle = 'rgba(255,255,255,.88)';
+        ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 2;
+        ctx.fillText(du.length + T(' 块 · ', ' blocks · ') + util + '%', tp.x + 9, tp.y + dieSize - 10);
+        ctx.shadowBlur = 0;
+      });
+
+      ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(500, 13);
+      ctx.textAlign = 'right';
+      ctx.fillText(T('每格 1mm² · ', '1mm² per cell · ') + n + '×' + n + T(' 网格', ' grid') + ' · ' + k + ' die', W - M, dy - 12);
+      ctx.textAlign = 'left';
+    } else {
+      const dx = (W - dieSize) / 2;
+      drawShareDie(ctx, dx, dy, dieSize, units, n, { radius: 14 });
+      ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(500, 13);
+      ctx.textAlign = 'right';
+      ctx.fillText(T('每格 1mm² · ', '1mm² per cell · ') + n + '×' + n + T(' 网格', ' grid'), W - M, dy - 12);
+      ctx.textAlign = 'left';
+    }
 
     /* 模块清单 */
-    const ly = dy + dieSize + 46;
+    const ly = dy + (allMode ? gridH : dieSize) + 46;
     ctx.fillStyle = '#18181b'; ctx.font = shareFont(700, 24);
-    ctx.fillText('模块清单', M, ly);
+    ctx.fillText(X('模块清单'), M, ly);
     ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(400, 15);
-    ctx.fillText('共 ' + units.length + ' 个已放置单元', M + 112, ly - 1);
+    ctx.fillText(T('共 ', 'Total ') + units.length + ' ' + X('个已放置单元') + (allMode ? T(' · ' + k + ' die 汇总', ' · combined across ' + k + ' dies') : ''), M + 112, ly - 1);
 
-    const colW = cols === 2 ? (W - M * 2 - 32) / 2 : (W - M * 2);
+    const colW = lcols === 2 ? (W - M * 2 - 32) / 2 : (W - M * 2);
     legend.forEach((it, i) => {
-      const col = i % cols, row = Math.floor(i / cols);
+      const col = i % lcols, row = Math.floor(i / lcols);
       const x = M + col * (colW + 32);
       const y = ly + 34 + row * 42;
       shareRound(ctx, x, y + 3, 12, 12, 3);
@@ -4851,12 +6479,15 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
     /* 页脚 */
     ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(400, 13);
-    ctx.fillText('重振 ARM 荣光 · v15.3 · ' + new Date().toLocaleString('zh-CN'), M, H - 34);
+    ctx.fillText(T('重振 ARM 荣光 · v15.3 · ', 'Revive the Glory of ARM · v15.3 · ') + new Date().toLocaleString(I.isEN() ? 'en-US' : 'zh-CN'), M, H - 34);
     ctx.textAlign = 'right';
     ctx.fillText('ARM DYNASTY', W - M, H - 34);
     ctx.textAlign = 'left';
 
-    openShare(cv, 'arm-dynasty-layout.png', '当前 die 的完整版图 + 模块清单，已放大到模块名称可读。');
+    openShare(cv, allMode ? 'arm-dynasty-package.png' : 'arm-dynasty-layout.png',
+      allMode
+        ? T('全部 ' + k + ' 块 die 的拼接总览 + 互连拓扑 + 汇总模块清单。', 'All ' + k + ' dies in one package overview, with interconnect topology and a combined block list.')
+        : T('当前 die 的完整版图 + 模块清单，已放大到模块名称可读。', 'The full floorplan of the current die plus a block list, enlarged until labels are readable.'));
   }
 
   /** 成绩海报：封装芯片 + 跑分 */
@@ -4895,16 +6526,16 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     ctx.fillText('ARM DYNASTY · BENCHMARK RESULT', tx, 74);
     let ns = 44;
     ctx.font = shareFont(700, ns);
-    while (ns > 26 && ctx.measureText(st.chipName).width > W - tx - M) {
+    while (ns > 26 && ctx.measureText(chipNameText()).width > W - tx - M) {
       ns -= 2; ctx.font = shareFont(700, ns);
     }
     ctx.fillStyle = '#18181b';
-    ctx.fillText(st.chipName, tx, 124);
+    ctx.fillText(chipNameText(), tx, 124);
     ctx.fillStyle = '#52525b'; ctx.font = shareFont(400, 18);
-    ctx.fillText('“' + st.slogan + '”', tx, 154);
+    ctx.fillText('“' + sloganText() + '”', tx, 154);
     ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(500, 14);
-    ctx.fillText([st.brand, KB.node(st.node).short,
-      an.dieCount > 1 ? an.dieCount + ' die · ' + an.xdie.topoDef.name : '单片'].join('  ·  '), tx, 184);
+    ctx.fillText([brandText(), KB.node(st.node).short,
+      an.dieCount > 1 ? an.dieCount + ' die · ' + an.xdie.topoDef.name : X('单片')].join('  ·  '), tx, 184);
 
     /* 封装 */
     const pkgSize = 600, px = (W - pkgSize) / 2, py = 240;
@@ -4912,12 +6543,12 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
     /* 跑分卡片 */
     const cards = [
-      ['综合分', fmt(res.sust.total), '峰值 ' + fmt(res.peak.total)],
-      ['GB6 单核', fmt(res.peak.single), '持续 ' + fmt(res.sust.single)],
-      ['GB6 多核', fmt(res.peak.multi), '持续 ' + fmt(res.sust.multi)],
-      ['曼哈顿 3.1', fmt(res.peak.gpu), '持续 ' + fmt(res.sust.gpu) + ' fps'],
-      ['AI 算力', fmt(res.peak.ai), 'SME2 ×' + an.sme],
-      ['通信', String(an.modem.dl), 'Gbps 下行']
+      [X('综合分'), fmt(res.sust.total), T('峰值 ', 'Peak ') + fmt(res.peak.total)],
+      [X('GB6 单核'), fmt(res.peak.single), T('持续 ', 'Sustained ') + fmt(res.sust.single)],
+      [X('GB6 多核'), fmt(res.peak.multi), T('持续 ', 'Sustained ') + fmt(res.sust.multi)],
+      [X('曼哈顿 3.1'), fmt(res.peak.gpu), T('持续 ', 'Sustained ') + fmt(res.sust.gpu) + ' fps'],
+      [X('AI 算力'), fmt(res.peak.ai), 'SME2 ×' + an.sme],
+      [X('通信'), String(an.modem.dl), X('Gbps 下行')]
     ];
     const gx = M, gy = 880, gw = (W - M * 2 - 40) / 3, gh = 112, gap = 20;
     cards.forEach((c, i) => {
@@ -4936,10 +6567,10 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
     /* 底部数据 */
     const stats = [
-      ['峰值温度', res.peakT.toFixed(0) + ' °C'],
-      ['频率保持', (res.throttle * 100).toFixed(0) + ' %'],
-      ['封装良率', (an.yieldRate * 100).toFixed(1) + ' %'],
-      ['单颗成本', '¥' + fmt(an.bom)]
+      [X('峰值温度'), res.peakT.toFixed(0) + ' °C'],
+      [X('频率保持'), (res.throttle * 100).toFixed(0) + ' %'],
+      [X('封装良率'), (an.yieldRate * 100).toFixed(1) + ' %'],
+      [X('单颗成本'), '¥' + fmt(an.bom)]
     ];
     const sy = 1160;
     stats.forEach((s, i) => {
@@ -4953,12 +6584,12 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     /* 页脚 */
     ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(400, 13);
     ctx.fillText(res.grade.remark, M, 1244);
-    ctx.fillText('重振 ARM 荣光 · v15.3 · ' + new Date().toLocaleString('zh-CN'), M, 1272);
+    ctx.fillText(T('重振 ARM 荣光 · v15.3 · ', 'Revive the Glory of ARM · v15.3 · ') + new Date().toLocaleString(I.isEN() ? 'en-US' : 'zh-CN'), M, 1272);
     ctx.textAlign = 'right';
     ctx.fillText('ARM DYNASTY', W - M, 1272);
     ctx.textAlign = 'left';
 
-    openShare(cv, 'arm-dynasty-score.png', '封装芯片 + 关键跑分，适合发群 / 发朋友圈。');
+    openShare(cv, 'arm-dynasty-score.png', T('封装芯片 + 关键跑分，适合发群 / 发朋友圈。', 'Packaged chip + key benchmark scores — ready for group chats and social feeds.'));
   }
 
   /* ============================================================
@@ -4977,6 +6608,28 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     }
 
     if (res.crashed) {
+      if (I.isEN()) {
+        return `
+      <div class="section-head"><div><h2>It Crashed</h2>
+        <p>You pushed the clocks too hard. The silicon died halfway through the run — black screen, reboot, and frame drops.</p></div></div>
+      <div class="glass card">
+        <h3 style="margin-bottom:11px">Incident Report</h3>
+        <div class="statbar">
+          <div class="stat warn"><small>Crash probability</small><b>${(res.risk * 100).toFixed(0)}%</b></div>
+          <div class="stat warn"><small>CPU clock</small><b>${f2(res.rk.freq.cpu)}G</b></div>
+          <div class="stat warn"><small>GPU clock</small><b>${f2(res.rk.freq.gpu)}G</b></div>
+          <div class="stat warn"><small>Safe limit</small><b>${f2(res.rk.limits.cpuSafe)}G</b></div>
+        </div>
+        <div class="remark" style="margin-top:14px">
+          This silicon has only <b>${(st.quality.cpu * 100).toFixed(0)}%</b> CPU quality, and you ran it at <b>${f2(res.rk.freq.cpu)}GHz</b>.
+          Next time: lower the clocks, raise the voltage, or reroll for better silicon.
+        </div>
+        <div class="wrap" style="margin-top:16px">
+          <button class="btn btn-primary" data-act="back-oc">← Back to tuning</button>
+          <button class="btn" data-act="reset-mania">Reroll silicon</button>
+        </div>
+      </div>`;
+      }
       return `
       <div class="section-head"><div><h2>翻车了</h2>
         <p>频率拉得太狠，这颗硅在测试跑到一半的时候直接挂掉了 —— 黑屏、重启、掉帧三连。</p></div></div>
@@ -5030,9 +6683,9 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     <div class="result-hero">
       <div class="grade-ring"><div class="inner"><div class="g">${grade.grade}</div><div class="rn">${grade.title}</div></div></div>
       <div>
-        <span class="badge">${esc(st.brand)} · ${KB.node(st.node).short}</span>
-        <h1 style="font-size:clamp(24px,3vw,36px);margin:12px 0 5px">${esc(st.chipName)}</h1>
-        <p class="muted" style="font-size:13px">“${esc(st.slogan)}”</p>
+        <span class="badge">${esc(brandText())} · ${KB.node(st.node).short}</span>
+        <h1 style="font-size:clamp(24px,3vw,36px);margin:12px 0 5px">${esc(chipNameText())}</h1>
+        <p class="muted" style="font-size:13px">“${esc(sloganText())}”</p>
         <div class="score-cards" style="margin-top:18px">
           <div class="score-card"><small>鲸兔兔 v10 综合</small><b>${fmt(sust.total)}</b><div class="sust">峰值 ${fmt(peak.total)}</div></div>
           <div class="score-card"><small>GB6 单核</small><b>${fmt(peak.single)}</b><div class="sust">持续 ${fmt(sust.single)}</div></div>
@@ -5066,7 +6719,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <div class="glass card">
         <h3 style="margin-bottom:14px">Geekbench 6 多核 · 与历代旗舰对比</h3>
         <div class="cmp">
-          <div class="cmp-row me"><span class="nm">${esc(st.chipName)}</span>
+          <div class="cmp-row me"><span class="nm">${esc(chipNameText())}</span>
             <span class="cmp-bar"><i style="width:${peak.multi / maxMulti * 100}%"></i></span>
             <span class="vl mono">${fmt(peak.multi)}</span></div>
           ${cmpMulti}
@@ -5074,7 +6727,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
         <div class="hr"></div>
         ${gpuRefs.length ? `<h3 style="margin-bottom:14px">GFXBench 曼哈顿 3.1（fps）</h3>
         <div class="cmp">
-          <div class="cmp-row me"><span class="nm">${esc(st.chipName)}</span>
+          <div class="cmp-row me"><span class="nm">${esc(chipNameText())}</span>
             <span class="cmp-bar"><i style="width:${peak.gpu / maxGpu * 100}%"></i></span>
             <span class="vl mono">${fmt(peak.gpu)}</span></div>
           ${cmpGpu}
@@ -5090,7 +6743,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
           <div class="stat"><small>版图利用率</small><b>${(an.util * 100).toFixed(0)}%</b></div>
           <div class="stat"><small>${an.dieCount > 1 ? '封装良率' : '良率'}</small><b>${(an.yieldRate * 100).toFixed(1)}%</b></div>
           <div class="stat"><small>散热方案</small><b style="font-size:12.5px">${an.cooling.name}</b></div>
-          <div class="stat"><small>每片晶圆出片${an.dieCount > 1 ? '（单 die）' : ''}</small><b>${an.perWafer} 颗</b></div>
+          <div class="stat"><small>每片晶圆出片${an.dieCount > 1 ? '（单 die）' : ''}</small><b>${an.perWafer} ${T('颗', 'dies')}</b></div>
         </div>
         <div class="wrap" style="margin-top:16px">
           <button class="btn" data-act="back-oc">← 重新超频</button>
@@ -5114,7 +6767,9 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       stage.innerHTML = (VIEWS[st.screen] || viewHome)();
       /* 立刻结算一次布局，避免新 DOM 在合成器上先空一帧再填充（看起来就是闪一下） */
       void stage.offsetHeight;
+      I.translateTree(stage);
       renderSteps();
+      I.translateTree(document.getElementById('steps'));
       if (st.screen === 'result' && st.result && !st.result.crashed) {
         const cv = $('#chart2');
         if (cv) setTimeout(() => drawChart(cv, st.result.series, st.result.series.length), 50);
@@ -5820,10 +7475,13 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       case 'reset-mania': st.quality = E.makeQuality(rngSeed()); st.result = null; save(); go('oc'); toast('重新抽了一颗硅'); break;
       case 'copy-spec': copy(specText(), '规格文案已复制'); break;
       case 'copy-review': copy(reviewText(), '发布会文案已复制'); break;
-      case 'share-layout': buildLayoutShare(); break;
+      case 'share-layout': chooseShareLayout(); break;
+      case 'share-layout-current': buildLayoutShare('current'); break;
+      case 'share-layout-all': buildLayoutShare('all'); break;
       case 'share-result': buildResultShare(); break;
       case 'share-save': saveShareImage(); break;
       case 'close-share': closePopup(); shareCanvas = null; shareName = ''; break;
+      case 'close-share-choice': closePopup(); break;
     }
   }
 
@@ -5922,7 +7580,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       updateOCLive();
       return;
     }
-    if (t.id === 'f-name' || t.id === 'f-name2') { st.chipName = t.value || '未命名 SoC'; save(); return; }
+    if (t.id === 'f-name' || t.id === 'f-name2') { st.chipName = t.value || T('未命名 SoC', 'Untitled SoC'); save(); return; }
     if (t.id === 'f-slogan') { st.slogan = t.value; save(); return; }
   }
 
@@ -6010,8 +7668,29 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       allU.filter(u => u.kind === kind && u.x >= 0).forEach(u => { m[u[key]] = (m[u[key]] || 0) + (u.count || 1); });
       return Object.keys(m).map(id => `${m[id]}× ${kind === 'cpu' ? KB.core(id).name : KB.gpu(id).name} @ ${f2(E.unitFreq(allU.find(u => u[key] === id && u.x >= 0)))}GHz`).join('\n  ');
     };
-    return `【${st.chipName}】${st.slogan}
-品牌：${st.brand}
+    if (I.isEN()) {
+      return `【${chipNameText()}】${sloganText()}
+Brand: ${brandText()}
+Process: ${KB.node(st.node).name} · ${an.dieCount} × ${st.mm2}mm² die = ${an.areaTotal}mm² · utilization ${(an.util * 100).toFixed(0)}%
+Package: ${an.dieCount > 1 ? an.xdie.topoDef.name + ' · ' + an.xdie.links.map(l => l.short).join(' / ') + ' · Q ' + (an.xdie.Q * 100).toFixed(0) + '%' : 'Single die'}
+CPU: ${an.cpu.cores} cores
+  ${by('cpu', 'coreId')}
+GPU: ${an.gpu.cores} cores
+  ${by('gpu', 'archId')}
+Memory: ${an.mem.label} (${an.mem.bw.toFixed(1)}GB/s, ${an.mem.count} blocks)
+Modem: ${KB.modem(st.modem).name}
+NPU: ${an.npu.label} (${an.npu.tops} TOPS)
+ISP: ${an.isp.label} (${an.isp.cap} GPix/s)
+Video codec: ${an.vdec.label} (throughput ${an.vdec.cap})
+Audio DSP: ${an.adsp.label} (${an.adsp.cap} GOPS)
+High-speed I/O: ${an.hsio.label}${an.hsio.count ? ' (' + fmt(an.hsio.bw) + 'GB/s, ' + an.hsio.cells + ' cells)' : ''}
+SLC: ${an.slc.mb}MB (${an.slc.count} blocks)${st.noc ? ' · NoC interconnect' : ''}
+Estimated Geekbench 6: ${fmt(an.score.single)} / ${fmt(an.score.multi)}
+Estimated Manhattan 3.1: ${fmt(an.gpu.fps)} fps
+Per-die yield ${(an.dieYield * 100).toFixed(1)}% · package yield ${(an.yieldRate * 100).toFixed(1)}% · unit cost ¥${fmt(an.bom)}`;
+    }
+    return `【${chipNameText()}】${sloganText()}
+品牌：${brandText()}
 制程：${KB.node(st.node).name} · ${an.dieCount} × ${st.mm2}mm² die = ${an.areaTotal}mm² · 利用率 ${(an.util * 100).toFixed(0)}%
 封装：${an.dieCount > 1 ? an.xdie.topoDef.name + ' · ' + an.xdie.links.map(l => l.short).join(' / ') + ' · Q ' + (an.xdie.Q * 100).toFixed(0) + '%' : '单片'}
 CPU：${an.cpu.cores} 核
@@ -6031,10 +7710,25 @@ SLC：${an.slc.mb}MB（${an.slc.count} 块）${st.noc ? ' · NoC 互连' : ''}
 单 die 良率 ${(an.dieYield * 100).toFixed(1)}% · 封装良率 ${(an.yieldRate * 100).toFixed(1)}% · 单颗成本 ¥${fmt(an.bom)}`;
   }
   function reviewText() {
-    const r = st.result; if (!r || r.crashed) return '这次翻车了，没有成绩单……';
-    return `${st.chipName} —— ${r.grade.title}（${r.grade.grade} 级）
+    const r = st.result;
+    if (!r || r.crashed) return T('这次翻车了，没有成绩单……', 'This run crashed — no scorecard.');
+    if (I.isEN()) {
+      return `${chipNameText()} — ${r.grade.title} (Grade ${r.grade.grade})
 
-“${st.slogan}”
+“${sloganText()}”
+
+WhaleBench v10 Total: ${fmt(r.sust.total)} (peak ${fmt(r.peak.total)})
+Geekbench 6: single ${fmt(r.peak.single)} / multi ${fmt(r.peak.multi)}
+GFXBench Manhattan 3.1: ${fmt(r.peak.gpu)} fps
+Package: ${r.an.dieCount > 1 ? r.an.dieCount + ' die · ' + r.an.xdie.topoDef.name + ' · Q ' + (r.an.xdie.Q * 100).toFixed(0) + '%' : 'Single die'}
+Peak power ${f1(r.peakP)}W · peak temperature ${r.peakT.toFixed(0)}°C · clock retention ${(r.throttle * 100).toFixed(0)}%
+Package yield ${(r.an.yieldRate * 100).toFixed(1)}% · unit cost ¥${fmt(r.an.bom)}
+
+${r.grade.remark}`;
+    }
+    return `${chipNameText()} —— ${r.grade.title}（${r.grade.grade} 级）
+
+“${sloganText()}”
 
 鲸兔兔 v10 综合：${fmt(r.sust.total)}（峰值 ${fmt(r.peak.total)}）
 Geekbench 6：单核 ${fmt(r.peak.single)} / 多核 ${fmt(r.peak.multi)}
@@ -6069,7 +7763,7 @@ ${r.grade.remark}`;
     try { if (defs) { lgAnim ? defs.unpauseAnimations() : defs.pauseAnimations(); } } catch (e) { }
     if (active) syncGlassScale();
     const btn = document.querySelector('#btn-glass .lbl');
-    if (btn) btn.textContent = active ? '折射 开' : '折射 关';
+    if (btn) btn.textContent = active ? T('折射 开', 'Refraction On') : T('折射 关', 'Refraction Off');
   }
   function initGlass() {
     try {
@@ -6093,7 +7787,7 @@ ${r.grade.remark}`;
   }
   function toggleGlass() {
     lgUserOn = !lgUserOn; applyGlass();
-    toast(lgSupported && lgUserOn ? '已开启液态玻璃折射' : '已降级为纯模糊（省电模式）');
+    toast(lgSupported && lgUserOn ? T('已开启液态玻璃折射', 'Liquid-glass refraction enabled') : T('已降级为纯模糊（省电模式）', 'Fell back to plain blur (power-saving mode)'));
   }
 
   /* ---------------- 主题 ---------------- */
@@ -6101,15 +7795,58 @@ ${r.grade.remark}`;
     const dark = st.theme === 'dark';
     document.body.classList.toggle('dark', dark);
     const l = document.querySelector('#theme-lbl');
-    if (l) l.textContent = dark ? '暗灰' : '浅色';
+    if (l) l.textContent = dark ? T('暗灰', 'Dark') : T('浅色', 'Light');
+    const h = document.querySelector('#btn-help');
+    if (h) h.textContent = T('帮助', 'Help');
   }
   function toggleTheme() {
     st.theme = st.theme === 'dark' ? 'light' : 'dark';
     applyTheme(); save();
-    toast(st.theme === 'dark' ? '已切换到暗灰主题' : '已切换到浅色主题');
+    toast(st.theme === 'dark' ? T('已切换到暗灰主题', 'Switched to dark theme') : T('已切换到浅色主题', 'Switched to light theme'));
+  }
+
+  function helpEN() {
+    return `
+      <div class="between"><h2>How to Play</h2>
+        <button class="btn btn-icon" onclick="document.getElementById('modal').hidden=true">✕</button></div>
+      <div class="stack" style="font-size:13px;line-height:1.85;color:var(--ink-2);margin-top:14px">
+        <div><b style="color:var(--ink)">① Platform · Area · Process</b><br/>
+          Choose a <b>platform</b>: Mobile SoC / Desktop Processor / Server Processor. It determines available die areas, cooling headroom, power limit, and thermal limit, and changes the reference chips you are compared against. <b>Switching platform or starting a new chip clears the previous selections and floorplan.</b></div>
+        <div><b style="color:var(--ink)">Multi-die assembly (desktop / server only)</b><br/>
+          In ① choose 2–4 base dies and assemble them into one large chip like Apple M Pro / Max / Ultra. Each die has its own floorplan; the floorplan page shows a <b>Die 1 / Die 2 / … / Overview</b> selector and defaults to Die 1.<br/>
+          <b>Overview</b> shows all dies together and draws the interconnect topology. You can change the <b>topology</b> (linear / ring / mesh / all-to-all) and the <b>default link type</b>, and override each die-to-die link (organic substrate / silicon bridge / interposer / D2D).<br/>
+          Cross-die multi-core / GPU / AI / ray-tracing scores are discounted by interconnect quality <b>Q</b>; media and local memory are not. Multi-die packages also suffer a thermal-resistance penalty, and yield multiplies per die — assembly is not a free doubling.</div>
+        <div><b style="color:var(--ink)">② Floorplan (the core of the game)</b><br/>
+          Click “+ Add …” → pick a model → drag it onto the die. CPU / GPU / memory controller / NPU / SLC / <b>ISP / video decoder / audio DSP</b> can all be stacked without a quantity limit.<br/>
+          <b>High-speed I/O</b> is special (PCIe / D2D / Fabric): it has <b>no physical minimum area</b>. After adding it, use W / H in the Selected Block panel to stretch it; bandwidth, cost, and power all scale with occupied cells. Higher interconnect bandwidth improves multi-core CPU and GPU scaling.<br/>
+          The media trio (ISP / video decoder / audio DSP) feeds the “media engine” part of the total score and appears in the spec sheet and architect’s review.<br/>
+          <b>GPU blocks</b> can be resized by dragging the lower-right corner: area beyond the physical minimum becomes cache/power headroom, granting <b>+2%</b> performance per extra cell (up to +10%).<br/>
+          <b>CPU core area is fixed</b> by the selected model. It cannot be stretched — only width and height can be swapped (area stays the same).<br/>
+          Press <b>R</b> or click “Swap ↻” to swap width and height.<br/>
+          <b>Shift + click</b> multiple GPU blocks: any <b>edge-adjacent</b> blocks can merge into one GPU region. Shared L2 grants +1.5% per extra core (up to +6%); cells needed to complete the rectangle are charged as area. Merged regions can be split again.<br/>
+          <b>Place CPU cores next to SLC</b>: closer distance means better cache locality, up to +12% score (shown live in the inspector).<br/>
+          <b>Drag a block beyond the die edge and release = delete</b>; drag it back to cancel. <b>Drag on empty die space = marquee select</b> (touch: <b>long-press empty space</b> to enter selection mode, then drag). The Selection panel on the right can <b>merge GPUs</b>, <b>copy</b>, or <b>delete</b> every enclosed block. Enclose 2+ connected, same-architecture, same-frequency GPUs and click “Merge GPUs” to form one large region.<br/>
+          <b>Drag any block inside a selection = move the whole selection</b> (relative layout preserved; an invalid drop shows a red box and returns it). Hold <b>Alt</b> to move only the block you grabbed.<br/>
+          <b>Copy is a pure translation</b>: relative layout, sizes, and frequencies are preserved and pasted nearby. The selection follows the copy so you can paste repeatedly; if there is not enough space, the copies go to Unplaced.<br/>
+          Drop previews appear only while dragging (transparent = free, red = conflict). Unused blocks in Unplaced do not block tape-out; they simply do not contribute.<br/>
+          When a spot cannot fit the default shape, the block <b>auto-fits</b> (for example, 2×2 becomes 1×4). It will not grow wastefully when there is room, and dragging it out restores the default size.</div>
+        <div><b style="color:var(--ink)">③ Tape-out & Package</b><br/>
+          Cut the die from the wafer, attach the substrate, and place the solder balls — you get a showcase-ready SoC and a spec sheet.</div>
+        <div><b style="color:var(--ink)">④ Overclock Lab</b><br/>
+          Raise clocks, add voltage, and unlock the power limit. Each piece of silicon has a random <b>quality</b>: better quality means a higher safe overclock ceiling. Exceeding the safe line risks a crash.</div>
+        <div><b style="color:var(--ink)">⑤ Benchmark Launch</b><br/>
+          Geekbench 6, GFXBench Manhattan 3.1, memory, AI, media engine, and total score. Watch <b>peak vs. sustained</b> — the chip throttles once temperature reaches steady state.</div>
+        <div><b style="color:var(--ink)">How multi-core scaling works</b><br/>
+          Up to 8 cores uses the original mobile calibration; beyond that it gradually switches to the platform baseline: <b>Mobile 0.55 / Desktop 0.66 / Server 0.70</b>, with servers decaying slowest. <b>SLC per core</b> (4MB/core = full) and <b>layout locality</b> (up to +12%) add up to +20% multi-core efficiency. Large-cluster designs (4-core clusters, 16MB SLC each, 32MB shared) score clearly higher than the old one-size-fits-all model.</div>
+        <div class="hr"></div>
+        <div><b style="color:var(--ink)">Interface</b><br/>
+          Top-right buttons: <b>Home</b>, <b>EN / 中文</b> language switch, <b>Light / Dark</b> theme, <b>Refraction</b> toggle (turn it off for plain blur and lower power), and Help.</div>
+        <div class="tiny">Data anchors: full ARM CPU line-up (2020–2026), four generations of Qualcomm Oryon, measured GB6 scores, ARM / Adreno GPU model summaries, and mobile modem references. ISP / video decoder / audio DSP / high-speed I/O are simulator additions.</div>
+      </div>`;
   }
 
   function showHelp() {
+    if (I.isEN()) { popup(helpEN()); return; }
     popup(`
       <div class="between"><h2>怎么玩？</h2>
         <button class="btn btn-icon" onclick="document.getElementById('modal').hidden=true">✕</button></div>
@@ -6153,7 +7890,7 @@ ${r.grade.remark}`;
           所以“4 核一簇、每簇 16MB SLC、两簇共享 32MB”的大核设计会明显高于旧算法，不会被一刀切压成 18%。</div>
         <div class="hr"></div>
         <div><b style="color:var(--ink)">界面</b><br/>
-          右上角三个开关：<b>浅色 / 暗灰</b>主题切换、<b>折射</b>开关（关掉退成纯模糊，省电）、帮助。</div>
+          右上角五个开关：<b>首页</b>（一键回到首页）、<b>EN / 中文</b>语言切换、<b>浅色 / 暗灰</b>主题、<b>折射</b>开关（关掉退成纯模糊，省电）、帮助。</div>
         <div class="tiny">数据锚点：ARM CPU 全谱系（2020-2026）、高通 Oryon 四代规格、GB6 实测跑分、ARM / Adreno GPU 型号汇总、移动端基带型号参考。ISP / 视频解码 / 音频 DSP / 高速连接为模拟器补充的内建数据。</div>
       </div>`);
   }
@@ -6308,6 +8045,8 @@ ${r.grade.remark}`;
     $('#btn-glass').addEventListener('click', toggleGlass);
     $('#btn-theme').addEventListener('click', toggleTheme);
     $('#btn-help').addEventListener('click', showHelp);
+    $('#btn-home').addEventListener('click', goHome);
+    $('#btn-lang').addEventListener('click', () => setLang(I.isEN() ? 'zh' : 'en'));
     $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closePopup(); });
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { st.pending = null; st.selRect = null; hidePreview(); closePopup(); if (st.screen === 'layout') render(); }
@@ -6330,9 +8069,15 @@ ${r.grade.remark}`;
     try {
       load();
       if (!st.theme) st.theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+      I.localizeKB();
+      I.applyStatic();
+      /* 存档里的成绩单可能保留了上次语言的展示文案；按相同参数重算一次，
+         保证切换语言 / 重新打开后结果页完整本地化。 */
+      if (st.result) st.result = E.simulate(st, st.oc, st.quality, { rng: seedRng(benchSeed()) });
       applyTheme();
       initGlass();
       bind();
+      I.startObserver();
       if (!st.quality) st.quality = E.makeQuality(rngSeed());
       bindActive(st);
       rebuildXdieLinks(st);
