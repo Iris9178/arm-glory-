@@ -1,3 +1,7 @@
+![Language](https://img.shields.io/badge/Language-EN%20%2F%20中文-blue)
+![Single File](https://img.shields.io/badge/Single--File-HTML-orange)
+![Vanilla JS](https://img.shields.io/badge/Vanilla-JS-yellow)
+![Canvas](https://img.shields.io/badge/Render-Canvas-blueviolet)
 # arm-glory-
 #重振arm荣光
 在浏览器里当芯片架构师：选 die 面积、一颗一颗摆 CPU/GPU 核心、超频跑分。
