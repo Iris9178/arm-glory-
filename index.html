@@ -1,13 +1,12 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
+<html lang="zh-CN"><head>
 <!-- 单文件构建 · 由 index.html + css/style.css + js/*.js 合并而成 · 无外部依赖 -->
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>重振 ARM 荣光 · ARM Dynasty · v15.3</title>
-<meta name="description" content="选 die 面积、逐个摆放 CPU/GPU 核心、超频跑分的芯片自制模拟器" />
-<meta http-equiv="Cache-Control" content="no-store" />
-<meta name="build" content="v15.3-2026-10-17" />
+<meta name="description" content="选 die 面积、逐个摆放 CPU/GPU 核心、超频跑分的芯片自制模拟器">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="build" content="v15.3-2026-10-17">
 <style>
 /* ============================================================
    重振 ARM 荣光 · ARM Dynasty
@@ -1231,10 +1230,10 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
 
 </style>
 </head>
-<body>
+<body class="">
 
 <!-- 启动自检遮罩：脚本挂了也要让你看见原因，而不是白屏 -->
-<div id="boot" class="boot"><span class="boot-spin"></span>正在初始化…</div>
+<div id="boot" class="boot" style=""><span class="boot-spin"></span>正在初始化…</div>
 <noscript>
   <div class="boot err noscript">
     <b>JavaScript 被禁用或被拦截</b>
@@ -2651,16 +2650,15 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
   <defs>
     <filter id="lg" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
       <!-- ① 低频噪声：决定折射的"形状尺度" -->
-      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="1" seed="5" result="noise"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.010" numOctaves="1" seed="5" result="noise"></feTurbulence>
       <!-- ② 让噪声缓慢漂移：画面就动起来了 -->
       <feOffset in="noise" dx="0" dy="0" result="moved">
-        <animate attributeName="dx" values="-90;90;-90" dur="26s" repeatCount="indefinite"/>
+        <animate attributeName="dx" values="-90;90;-90" dur="26s" repeatCount="indefinite"></animate>
       </feOffset>
       <!-- ③ 抹平噪声硬边，避免撕裂纹理 -->
-      <feGaussianBlur in="moved" stdDeviation="2.6" result="soft"/>
+      <feGaussianBlur in="moved" stdDeviation="2.6" result="soft"></feGaussianBlur>
       <!-- ④ 按噪声位移原图：折射本体 -->
-      <feDisplacementMap id="disp" in="SourceGraphic" in2="soft" scale="16"
-                         xChannelSelector="R" yChannelSelector="G"/>
+      <feDisplacementMap id="disp" in="SourceGraphic" in2="soft" scale="10" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
     </filter>
   </defs>
 </svg>
@@ -2686,7 +2684,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
       <span class="dot"></span><span class="lbl" id="lang-lbl">EN</span>
     </button>
     <button id="btn-theme" class="chip-btn glass-2" title="切换浅色 / 暗灰主题">
-      <span class="th"></span><span class="lbl" id="theme-lbl">浅色</span>
+      <span class="th"></span><span class="lbl" id="theme-lbl">暗灰</span>
     </button>
     <button id="btn-glass" class="chip-btn glass-2" title="切换液态玻璃折射">
       <span class="dot"></span><span class="lbl">折射 开</span>
@@ -2704,7 +2702,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
   <span class="ic"></span><span id="delhint-txt">拖出裸片即删除该模块</span>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<div id="modal" class="modal-wrap" hidden></div>
+<div id="modal" class="modal-wrap" hidden=""></div>
 
 <script>
 /* ============================================================
@@ -6328,7 +6326,7 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
     const v = allMode ? E.validateAll(st) : E.validate(st);
 
     const cell = allMode
-      ? (n <= 12 ? 50 : n <= 16 ? 44 : n <= 20 ? 40 : 36)
+      ? (n <= 12 ? 64 : n <= 16 ? 56 : n <= 20 ? 50 : 44)
       : (n <= 12 ? 90 : n <= 16 ? 82 : n <= 20 ? 74 : 68);
     const dieSize = cell * n;
     const cols = allMode ? (k <= 1 ? 1 : 2) : 1;
@@ -6418,19 +6416,17 @@ body.dark .die-tab.on small{color:rgba(0,0,0,.52)}
         const tp = pos(i);
         const d = st.dies[i] || { units: [] };
         const du = (d.units || []).filter(u => u && u.x >= 0);
-        drawShareDie(ctx, tp.x, tp.y, dieSize, du, n, { labels: false, radius: 10, io: true });
         const util = du.length ? Math.round(du.reduce((a, u) => a + u.w * u.h, 0) / (n * n) * 100) : 0;
+        /* 标签画在每块 die 上方，避免盖住模块名称 */
+        const tag = 'D' + (i + 1) + ' · ' + du.length + T(' 块 · ', ' blocks · ') + util + '%';
         ctx.font = shareFont(700, 11);
-        const tag = 'D' + (i + 1);
-        const tw = ctx.measureText(tag).width + 16;
-        ctx.fillStyle = 'rgba(24,24,27,.72)';
-        shareRound(ctx, tp.x + 8, tp.y + 8, tw, 22, 6); ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.fillText(tag, tp.x + 16, tp.y + 23);
-        ctx.font = shareFont(600, 10);
-        ctx.fillStyle = 'rgba(255,255,255,.88)';
-        ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 2;
-        ctx.fillText(du.length + T(' 块 · ', ' blocks · ') + util + '%', tp.x + 9, tp.y + dieSize - 10);
-        ctx.shadowBlur = 0;
+        const tw = ctx.measureText(tag).width + 18;
+        ctx.fillStyle = 'rgba(24,24,27,.76)';
+        shareRound(ctx, tp.x, tp.y - 26, tw, 21, 6); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+        ctx.fillText(tag, tp.x + 9, tp.y - 11);
+        drawShareDie(ctx, tp.x, tp.y, dieSize, du, n, { labels: true, radius: 10, io: true });
       });
 
       ctx.fillStyle = '#a1a1aa'; ctx.font = shareFont(500, 13);
@@ -8163,5 +8159,6 @@ ${r.grade.remark}`;
   setTimeout(showDiag, 1600);
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
